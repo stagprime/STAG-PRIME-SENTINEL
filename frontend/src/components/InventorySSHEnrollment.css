@@ -1,0 +1,12 @@
+.sentinel-enroll{border:1px solid #d7e4ed;border-radius:12px;padding:16px;margin-top:16px;background:#f8fbfe;display:flex;flex-direction:column;gap:10px;color:#183a51}
+.sentinel-enroll-head,.sentinel-enroll-stage{display:flex;gap:9px;align-items:center;margin:0}
+.sentinel-enroll-head{color:#104d6b}.sentinel-enroll-hint{margin:0;color:#547087;font-size:12px;line-height:1.55}
+.sentinel-enroll-stage{font-size:13px;font-weight:600;line-height:1.4}
+.sentinel-enroll-settings{display:flex;flex-direction:column;gap:10px;border-top:1px solid #d7e4ed;padding-top:12px}
+.sentinel-enroll-settings>label{display:flex;flex-direction:column;gap:4px;font-weight:600;font-size:12px}
+.sentinel-enroll-settings>label>input:not([type=checkbox]){height:38px;border:1px solid #c5d5e0;border-radius:7px;padding:0 10px;background:white;color:#183a51;width:100%;min-width:0}
+.sentinel-enroll-settings>.sentinel-enroll-confirm{flex-direction:row;align-items:flex-start;line-height:1.5;font-weight:500}
+.sentinel-enroll-confirm input{margin-top:4px;flex-shrink:0}
+.sentinel-enroll-error,.sentinel-enroll-success{margin:0;display:flex;gap:5px;align-items:flex-start;font-size:12px;line-height:1.4}
+.sentinel-enroll-error{color:#a13530}.sentinel-enroll-success{color:#0f6f51}
+.sentinel-enroll-refresh{background:transparent;border:0;text-align:left;color:#276a8a;display:flex;gap:6px;align-items:center;font-size:12px;padding:4px 0;cursor:pointer}

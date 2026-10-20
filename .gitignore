@@ -1,0 +1,31 @@
+# Local environments and dependencies
+.venv/
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Runtime data, databases, locks, and encrypted vault material
+data/
+backups/
+*.db
+*.sqlite
+*.sqlite3
+
+# Secrets and keys — never commit
+.env
+.env.*
+!.env.example
+*.pem
+*.ppk
+*.key
+alert_webhook.url
+
+# Editor and OS
+.idea/
+.vscode/
+.DS_Store
+*.local
+*.log

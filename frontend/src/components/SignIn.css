@@ -1,0 +1,25 @@
+
+.sentinel-login{min-height:100vh;display:grid;grid-template-columns:minmax(340px,1fr) minmax(440px,.9fr);background:#f3f7fb;color:#13263e}
+.login-story{min-height:100vh;background:radial-gradient(circle at 90% 60%,#154a69 0,transparent 48%),linear-gradient(145deg,#081a30,#102a49 70%,#08233e);color:white;padding:44px clamp(35px,5vw,100px);display:flex;flex-direction:column;position:relative;overflow:hidden}
+.login-story:after{content:'';position:absolute;border:1px solid #ffffff15;width:630px;height:630px;border-radius:50%;left:-190px;top:45%;pointer-events:none}
+.login-brand{display:flex;gap:13px;align-items:center;z-index:1;font-size:15px;font-weight:850;letter-spacing:1.2px}
+.login-brand img{width:58px;height:58px;object-fit:contain;object-position:center;border:1px solid #ffffff35;border-radius:10px;padding:6px;background:#ffffff12;box-sizing:border-box;flex-shrink:0}
+.login-brand strong{display:block;color:#eabd73;letter-spacing:3px;font-size:12px;margin-top:2px}
+.login-brand small{display:block;font-size:8px;letter-spacing:1.15px;color:#9dd9f7;margin-top:5px}
+.login-story-content{position:relative;z-index:1;margin:auto 0;padding:65px 0}
+.login-kicker{display:inline-flex;gap:10px;align-items:center;font-size:11px;letter-spacing:1.9px;font-weight:800;color:#80d4f7}
+.login-story-content h1{font-size:clamp(38px,5vw,73px);line-height:1.12;letter-spacing:-2px;margin:29px 0}
+.login-story-content h1 em{font-style:normal;color:#edbf78}
+.login-story-content p{font-size:15px;line-height:1.9;max-width:530px;color:#b9cce0}
+.login-points{display:flex;flex-direction:column;gap:18px;margin-top:48px;color:#d8e7f4;font-size:13px;font-weight:650}
+.login-points span{display:flex;align-items:center;gap:12px}.login-points svg{color:#70c7ee}
+.login-story-footer{color:#779ab5;font-size:10px;letter-spacing:1px;z-index:1}
+.login-auth{padding:40px;display:grid;place-items:center}
+.login-auth-box{width:min(100%,468px)}.login-official{min-height:88px;height:auto;max-height:130px;display:flex;align-items:center;justify-content:flex-start;margin-bottom:18px;overflow:visible}.login-official img{max-width:min(100%,320px);width:auto;height:auto;max-height:120px;object-fit:contain;object-position:left center;display:block}
+.login-label{font-size:11px;color:#008fbc;letter-spacing:1.8px;font-weight:850}.login-auth h2{font-size:38px;letter-spacing:-1.4px;margin:10px 0 12px;color:#102d4b}
+.login-auth p{color:#687c94;line-height:1.7;font-size:14px;margin:0 0 29px}.login-form{display:grid;gap:11px}.login-form>label{font-size:12px;font-weight:800;color:#294158;margin-top:10px}
+.login-input-wrap{border:1px solid #d8e3ed;border-radius:10px;background:#fff;display:flex;align-items:center;gap:11px;padding:0 15px;color:#7d94aa;min-height:53px;transition:.15s}
+.login-input-wrap:focus-within{border-color:#33a7d7;box-shadow:0 0 0 3px #2bb3ef1c}.login-input-wrap input{border:0;outline:0;min-width:0;flex:1;font-size:14px;color:#162a40;height:50px;background:transparent}.login-input-wrap button{background:none;border:0;padding:8px;color:#6d8298}
+.login-error{background:#fff1f0;color:#a83a36;padding:12px 15px;border-radius:8px;font-size:12px;border:1px solid #f2d7d5;line-height:1.6}.login-submit{border:0;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(100deg,#0a2947,#155f88);color:white;padding:16px 20px;border-radius:9px;font-weight:800;margin-top:15px;font-size:14px;box-shadow:0 9px 21px #092d4c24}.login-submit:disabled{opacity:.6;cursor:wait}
+.login-footnote{display:flex;gap:9px;align-items:flex-start;border-top:1px solid #e0e7ef;margin-top:32px;padding-top:20px;color:#678098;font-size:12px;line-height:1.7}.login-footnote svg{flex-shrink:0;color:#1384a4;margin-top:3px}.login-local-notice{display:block;color:#90a0af;line-height:1.6;margin-top:23px}
+@media(max-width:920px){.sentinel-login{grid-template-columns:1fr}.login-story{min-height:auto;padding:24px 25px}.login-story-content{display:none}.login-story-footer{display:none}.login-auth{padding:38px 25px;min-height:75vh}.login-auth h2{font-size:32px}}

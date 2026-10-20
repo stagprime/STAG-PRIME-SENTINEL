@@ -1,0 +1,26 @@
+:root {
+  font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  color: #14283a;
+  background:
+    radial-gradient(1200px 600px at 12% -10%, rgba(18, 120, 140, 0.09), transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, rgba(20, 70, 110, 0.07), transparent 50%),
+    linear-gradient(180deg, #eef3f7 0%, #f4f7fa 42%, #eef2f6 100%);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --sp-font: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --sp-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --sp-ink: #14283a;
+  --sp-muted: #5f7588;
+  --sp-line: #d5e2eb;
+  --sp-accent: #0d7a8c;
+  --sp-accent-2: #1a4f6e;
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 340px; min-height: 100vh; }
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+.monospaced, code, .ent-table td small, .server-cell span:not(.server-icon) {
+  font-family: var(--sp-mono);
+}

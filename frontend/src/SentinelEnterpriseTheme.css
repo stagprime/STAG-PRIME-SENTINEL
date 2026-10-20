@@ -1,0 +1,228 @@
+/* STAG PRIME SENTINEL — Enterprise Workspace / UI v2
+   Visual-only, additive layer. Existing routes, component logic and API behavior stay unchanged.
+   A consistent, compact control-room design for desktop and mobile. */
+:root {
+  --navy: #10233b;
+  --navy2: #17324e;
+  --ink: #162a3e;
+  --muted: #61768c;
+  --line: #e0e8f0;
+  --surface: #fff;
+  --canvas: #f3f6fa;
+  --aqua: #08a2b5;
+  --gold: #d49b54;
+  --shadow: 0 3px 15px rgba(13, 35, 66, .035);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-synthesis: none;
+}
+body {background:var(--canvas);}
+.sentinel-app{background:radial-gradient(circle at 84% 0,rgba(33,174,192,.035),transparent 33%),var(--canvas);}
+
+/* 01 / Sidebar: purpose-built, quiet navigation with compact targets */
+.sentinel-app .sidebar{width:224px;min-width:224px;background:linear-gradient(178deg,#101f35,#112740 62%,#10233a);border-right:1px solid #263c55;box-shadow:none;}
+.sentinel-app .sidebar::before{height:2px;background:linear-gradient(90deg,#16bdd0,#acdddb 53%,transparent);}
+.sentinel-app .brand{padding:19px 16px 12px;gap:11px;}
+.sentinel-app .brand-emblem{width:38px;height:40px;border-radius:10px;box-shadow:none;}
+.sentinel-app .brand-copy div{font-size:12px;letter-spacing:.95px;}
+.sentinel-app .brand-copy strong{font-size:10px;letter-spacing:2.8px;color:#6bd2da;}
+.sentinel-app .product-title{margin:1px 12px 24px;padding:8px 10px;letter-spacing:.75px;font-size:9px;border-color:#29455c;background:#1d354c;border-radius:7px;}
+.sentinel-app .sidebar-section{padding:0 21px;margin-bottom:8px;font-size:9px;letter-spacing:1.25px;color:#8fa6ba;}
+.sentinel-app .management-head{margin-top:23px;}
+.sentinel-app .nav-list{padding:0 9px;gap:2px;}
+.sentinel-app .nav-button,.sentinel-app .so-nav-toggle{min-height:37px;height:auto;padding:9px 12px;gap:10px;border-radius:7px;font-size:11.5px;color:#aec2d4;font-weight:650;line-height:1.2;}
+.sentinel-app .nav-button svg,.sentinel-app .so-nav-toggle svg{flex-shrink:0;width:16px;height:16px;}
+.sentinel-app .nav-button:hover,.sentinel-app .so-nav-toggle:hover,.sentinel-app .so-nav-toggle.open{background:#253f57;color:#f4faff;}
+.sentinel-app .nav-button.active{background:#24465b;color:#fff;box-shadow:inset 0 0 0 1px #35586c;}
+.sentinel-app .nav-button.active svg,.sentinel-app .so-nav-toggle.open svg:first-child{color:#60d7df;}
+.sentinel-app .active-bar{background:#28c3cf;width:2px;top:7px;bottom:7px;}
+.sentinel-app .so-nav-sublist{margin:1px 5px 4px 20px;border-color:#39536a;gap:2px;}
+.sentinel-app .so-nav-subitem{min-height:33px;margin-left:6px;padding:7px 8px;gap:7px;font-size:10.5px;line-height:1.3;border-radius:6px;}
+.sentinel-app .so-nav-subitem svg{width:14px;height:14px;flex-shrink:0;}
+.sentinel-app .so-nav-subitem.active{background:#27536b;color:#f8fdff;}
+.sentinel-app .so-nav-subitem.active svg{color:#80e4df;}
+.sentinel-app .sidebar-bottom{padding:18px 10px 0;}
+.sentinel-app .agent-box{padding:11px;border-radius:9px;border-color:#304d61;background:#1c354c;}
+.sentinel-app .agent-icon{margin-bottom:5px;}
+.sentinel-app .agent-box p{margin:6px 0;line-height:1.5;}
+.sentinel-app .sidebar-profile{margin-top:14px;padding:12px 3px 16px;}
+
+/* 02 / Workspace frame: smaller chrome and a stronger information hierarchy */
+.sentinel-app .topbar{height:59px;padding:0 27px;border-color:var(--line);background:rgba(255,255,255,.97);}
+.sentinel-app .breadcrumb{font-size:11.5px;gap:9px;}
+.sentinel-app .breadcrumb strong{color:#20374c;}
+.sentinel-app .top-right{gap:12px;}
+.sentinel-app .preview-tag{font-size:9px;padding:6px 9px;letter-spacing:.4px;border-radius:6px;}
+.sentinel-app .user-badge{height:30px;width:30px;font-size:10px;}
+.sentinel-app .icon-button{padding:7px;}
+.sentinel-app .main-content{max-width:1540px;padding:23px 27px 18px;}
+.sentinel-app .page-heading{margin-bottom:18px;gap:12px;}
+.sentinel-app .eyebrow{font-size:9px;letter-spacing:1.1px;color:#3e8a9c;}
+.sentinel-app .eyebrow span{width:6px;height:6px;background:#22bcc6;box-shadow:0 0 0 3px #d9f5f6;}
+.sentinel-app .page-heading h1{font-size:clamp(22px,2vw,27px);line-height:1.13;margin:7px 0 6px;letter-spacing:-.75px;color:#163047;font-weight:850;}
+.sentinel-app .page-heading p{font-size:11.5px;line-height:1.55;color:#718398;}
+.sentinel-app .btn-primary,.sentinel-app .btn-secondary{min-height:35px;padding:8px 12px;gap:7px;border-radius:7px;font-size:11px;font-weight:750;box-shadow:none;transform:none;}
+.sentinel-app .btn-primary{background:#123a55;border-color:#123a55;}
+.sentinel-app .btn-primary:hover{background:#165673;transform:none;}
+.sentinel-app .btn-secondary{border-color:#d3e0e8;color:#355369;background:#fff;}
+.sentinel-app .btn-secondary:hover{background:#f0f8fa;border-color:#9acbd2;}
+.sentinel-app button:focus-visible,.sentinel-app input:focus-visible,.sentinel-app select:focus-visible,.sentinel-app a:focus-visible,
+.sentinel-login button:focus-visible,.sentinel-login input:focus-visible{outline:2px solid #18a6be;outline-offset:3px;}
+.sentinel-app button:disabled{cursor:not-allowed;}
+.sentinel-app .panel,.sentinel-app .metric-card{border-color:var(--line);border-radius:11px;box-shadow:var(--shadow);}
+.sentinel-app .panel-header{padding:16px 18px 12px;}
+.sentinel-app .panel-header h2{font-size:14px;}
+.sentinel-app .tiny-label{font-size:9px;letter-spacing:.9px;color:#2f8190;}
+.sentinel-app .metric-card{padding:16px 17px;}
+.sentinel-app .metric-card::before{height:2px;}
+.sentinel-app .metric-value{font-size:30px;margin:9px 0 10px;}
+.sentinel-app .metric-head{font-size:11px;}
+.sentinel-app .metric-icon{width:30px;height:30px;}
+.sentinel-app .metrics-grid{gap:11px;margin-bottom:15px;}
+.sentinel-app .content-grid{gap:13px;margin-bottom:16px;}
+.sentinel-app .brand-hero{min-height:0;padding:18px 22px;margin-bottom:15px;gap:18px;grid-template-columns:minmax(0,1fr) 185px;border-radius:11px;background:linear-gradient(112deg,#0e2d43,#14415c 80%,#1b5a6d);box-shadow:0 8px 22px #102b4311;}
+.sentinel-app .brand-hero::before{opacity:.5;}
+.sentinel-app .brand-hero h2{font-size:clamp(21px,2.1vw,26px);margin:7px 0;letter-spacing:-.5px;}
+.sentinel-app .brand-hero p{font-size:11px;line-height:1.6;}
+.sentinel-app .brand-hero-facts{margin-top:11px;font-size:10px;gap:11px;}
+.sentinel-app .brand-hero-facts strong{font-size:14px;}
+.sentinel-app .brand-hero-identity{padding:8px;}
+.sentinel-app .brand-hero-identity img{max-height:80px;}
+.sentinel-app .preview-notice{padding:11px 15px;margin-bottom:15px;border-radius:9px;}
+.sentinel-app .preview-notice-icon{width:30px;height:30px;}
+.sentinel-app .server-table th{padding:11px 14px;}
+.sentinel-app .server-table td{padding:12px 14px;}
+.sentinel-app .fleet-panel{padding:17px;margin-bottom:16px;border-top-width:2px;}
+.sentinel-app .fleet-heading{margin-bottom:15px;}
+.sentinel-app .fleet-heading h2{font-size:18px;}
+.sentinel-app .fleet-cards{gap:11px;}
+.sentinel-app .fleet-card{padding:14px;border-radius:10px;box-shadow:none;}
+.sentinel-app .fleet-card:hover{transform:none;box-shadow:0 5px 14px #12334f12;}
+.sentinel-app .fleet-server-heading strong{font-size:15px;}
+.sentinel-app .fleet-stats strong{font-size:18px;}
+.sentinel-app .fleet-stats>div{padding:8px;}
+.sentinel-app .setting-tile{padding:18px;}
+.sentinel-app .modal,.sentinel-app .detail-drawer{box-shadow:0 22px 64px rgba(9,27,48,.17);}
+.sentinel-app .form-grid input,.sentinel-app .form-grid select{min-height:38px;border-radius:7px;}
+
+/* 03 / Server control: genuinely compact action cards; full catalog retained except Shutdown */
+.sentinel-app .scc-root{gap:13px;color:#233c50;}
+.sentinel-app .scc-hero{padding:17px 19px;border-radius:11px;background:linear-gradient(105deg,#fff,#f6fbfc);box-shadow:none;border-color:var(--line);}
+.sentinel-app .scc-kicker{font-size:9px;letter-spacing:1.05px;color:#147e8d;}
+.sentinel-app .scc-hero h2{font-size:clamp(19px,2vw,24px);margin:8px 0 7px;letter-spacing:-.65px;color:#183b50;}
+.sentinel-app .scc-hero h2 span{color:#0a8b9c;}
+.sentinel-app .scc-hero p{font-size:11px;line-height:1.55;max-width:670px;}
+.sentinel-app .scc-stats{margin-top:13px;gap:14px;font-size:10px;}
+.sentinel-app .scc-secondary{min-height:32px;padding:7px 10px;border-radius:7px;font-size:10.5px;}
+.sentinel-app .scc-notice{padding:10px 13px;border-radius:8px;gap:9px;background:#edf8fa;border-color:#d0e8ed;}
+.sentinel-app .scc-notice strong{font-size:11px;}
+.sentinel-app .scc-notice p{font-size:10.5px;margin-top:3px;line-height:1.5;}
+.sentinel-app .scc-layout{grid-template-columns:minmax(205px,253px) minmax(0,1fr);gap:12px;}
+.sentinel-app .scc-content{gap:12px;}
+.sentinel-app .scc-panel{border-radius:10px;box-shadow:var(--shadow);border-color:var(--line);}
+.sentinel-app .scc-sidebar{padding:14px 10px;}
+.sentinel-app .scc-panel-title h3{font-size:14px;margin-top:5px;}
+.sentinel-app .scc-search{margin:12px 3px 8px;border-radius:7px;}
+.sentinel-app .scc-search input{padding:8px 0;font-size:11px;}
+.sentinel-app .scc-filters{margin:0 3px 9px;}
+.sentinel-app .scc-filters button{padding:6px 3px;}
+.sentinel-app .scc-server-list{gap:3px;max-height:535px;}
+.sentinel-app .scc-server{padding:8px 7px;gap:8px;border-radius:7px;}
+.sentinel-app .scc-server-icon{width:28px;height:29px;border-radius:6px;}
+.sentinel-app .scc-server strong{font-size:11px;}
+.sentinel-app .scc-server small{font-size:10px;}
+.sentinel-app .scc-server em{font-size:9.5px;}
+.sentinel-app .scc-server.selected{background:#eaf7f9;border-color:#b3dce3;}
+.sentinel-app .scc-inventory{padding:8px;margin-top:10px;border-radius:7px;font-size:10.5px;}
+.sentinel-app .scc-identity,.sentinel-app .scc-operations,.sentinel-app .scc-scheduler,.sentinel-app .scc-diagnostics{padding:15px 17px;}
+.sentinel-app .scc-identity h3{font-size:19px;}
+.sentinel-app .scc-identity-heading{margin-top:6px;}
+.sentinel-app .scc-identity p{margin:5px 0;font-size:11px;}
+.sentinel-app .scc-identity-sub{margin-top:10px;padding-top:10px;gap:9px;}
+.sentinel-app .scc-identity-sub span{font-size:10px;}
+.sentinel-app .scc-chip,.sentinel-app .scc-draft,.sentinel-app .scc-diagnostic-badge{font-size:9px;padding:5px 8px;border-radius:6px;}
+.sentinel-app .scc-actions{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:12px;}
+.sentinel-app .scc-action{min-height:104px;padding:12px 12px 11px;gap:6px;border-radius:8px;background:#fff;transition:border-color .15s,box-shadow .15s;}
+.sentinel-app .scc-action:hover:not(:disabled){background:#f8fcfd;border-color:#81c8d4;box-shadow:0 3px 12px #133c5010;}
+.sentinel-app .scc-action>svg{width:17px;height:17px;}
+.sentinel-app .scc-action strong{font-size:11px;line-height:1.25;}
+.sentinel-app .scc-action small{font-size:10px;line-height:1.4;color:#607c8e;}
+.sentinel-app .scc-action span{font-size:10px;gap:5px;}
+.sentinel-app .scc-action-preview{margin-top:11px;padding:13px;border-radius:8px;}
+.sentinel-app .scc-action-preview h4{font-size:12px;margin:7px 0;}
+.sentinel-app .scc-warning,.sentinel-app .scc-api-state,.sentinel-app .scc-api-success,.sentinel-app .scc-api-error{padding:9px 10px;font-size:10px;border-radius:7px;}
+.sentinel-app .scc-description{font-size:10.5px;margin:10px 0;}
+.sentinel-app .scc-diagnostic-actions button{min-height:33px;padding:7px 10px;font-size:10.5px;border-radius:7px;}
+.sentinel-app .scc-diagnostic-actions button svg{width:15px;height:15px;}
+.sentinel-app .scc-diagnostic-metrics{gap:7px;margin:9px 0;}
+.sentinel-app .scc-diagnostic-metrics span{padding:8px;}
+.sentinel-app .scc-diagnostic-metrics b{font-size:14px;}
+.sentinel-app .scc-form{gap:10px;}
+.sentinel-app .scc-form input:not([type=checkbox]),.sentinel-app .scc-form select{min-height:34px;border-radius:7px;font-size:11px;}
+.sentinel-app .scc-primary{min-height:34px;padding:8px 12px;border-radius:7px;font-size:11px;}
+.sentinel-app .scc-caution{border-radius:8px;padding:10px 13px;}
+
+/* 04 / Other admin areas: common component density without changing layout/functionality */
+.sentinel-app :is(.so-hero,.install-hero,.onboarding-banner,.um-hero){padding:18px 20px;border-radius:11px;box-shadow:none;}
+.sentinel-app :is(.so-panel,.install-side,.install-main,.onboarding-server-list,.onboarding-detail,.um-panel){border-radius:10px;box-shadow:var(--shadow);}
+.sentinel-app :is(.so-hero h2,.install-hero h2,.onboarding-banner h2,.um-hero h2){font-size:clamp(19px,2vw,25px);letter-spacing:-.65px;line-height:1.2;}
+.sentinel-app :is(.so-soft-button,.so-admin-actions button,.install-copy,.install-step-actions button,.install-bottom button,.onboarding-detail-actions button,.um-primary,.um-outline,.um-panel-actions button,.setup-plan-btn){min-height:34px;padding:7px 11px;border-radius:7px;font-size:11px;box-shadow:none;}
+.sentinel-app :is(.so-step,.install-step-link,.onboarding-step){padding-top:10px;padding-bottom:10px;}
+.sentinel-app .um-summary{gap:10px;}
+.sentinel-app .um-panel-head{padding:14px 16px;}
+.sentinel-app .um-toolbar{padding:12px 15px;}
+.sentinel-app .um-table th,.sentinel-app .um-table td{padding-top:10px;padding-bottom:10px;}
+.sentinel-app .install-layout,.sentinel-app .onboarding-layout,.sentinel-app .so-layout{gap:13px;}
+.sentinel-app .install-command-card{border-radius:8px;}
+.sentinel-app .install-variable-field input,.sentinel-app .install-variable-field select{min-height:35px;}
+.sentinel-app .install-category,.sentinel-app .install-help-toggle{border-radius:7px;}
+
+/* 05 / Identity experience (login) consistent with new Enterprise design */
+.sentinel-login{background:#f3f6fa;}
+.sentinel-login .login-story{background:linear-gradient(150deg,#0d263c,#17495c 82%,#105a66);}
+.sentinel-login .login-story-content h1{font-size:clamp(33px,4.6vw,60px);letter-spacing:-1.5px;}
+.sentinel-login .login-story-content h1 em{color:#90e1df;}
+.sentinel-login .login-story-content p{font-size:13px;line-height:1.75;}
+.sentinel-login .login-points{gap:13px;margin-top:32px;font-size:12px;}
+.sentinel-login .login-auth h2{font-size:31px;}
+.sentinel-login .login-auth-box{max-width:430px;}
+.sentinel-login .login-input-wrap{min-height:45px;border-radius:8px;}
+.sentinel-login .login-input-wrap input{height:44px;}
+.sentinel-login .login-submit{min-height:43px;padding:10px 14px;border-radius:8px;box-shadow:none;}
+
+@media (max-width:1300px){
+  .sentinel-app .sidebar{width:210px;min-width:210px;}
+  .sentinel-app .scc-actions{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media (max-width:1100px){
+  .sentinel-app .scc-layout{grid-template-columns:1fr;}
+  .sentinel-app .scc-server-list{max-height:235px;}
+  .sentinel-app .brand-hero{grid-template-columns:minmax(0,1fr) 150px;}
+}
+@media (max-width:760px){
+  .sentinel-app .sidebar{position:fixed;left:-270px;width:240px;min-width:240px;height:100vh;}
+  .sentinel-app .sidebar.mobile-open{left:0;}
+  .sentinel-app .topbar{height:57px;padding:0 14px;}
+  .sentinel-app .main-content{padding:17px 13px 18px;}
+  .sentinel-app .page-heading{align-items:flex-start;flex-wrap:wrap;}
+  .sentinel-app .page-heading h1{font-size:21px;}
+  .sentinel-app .brand-hero{grid-template-columns:1fr;padding:17px;}
+  .sentinel-app .brand-hero-identity{display:none;}
+  .sentinel-app .metrics-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .sentinel-app .scc-hero{padding:15px;}
+  .sentinel-app .scc-hero-flex{align-items:stretch;}
+  .sentinel-app .scc-actions{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .sentinel-app .scc-identity,.sentinel-app .scc-operations,.sentinel-app .scc-scheduler,.sentinel-app .scc-diagnostics{padding:13px;}
+  .sentinel-app .scc-action{min-height:110px;}
+  .sentinel-app .scc-form{grid-template-columns:1fr;}
+}
+@media (max-width:480px){
+  .sentinel-app .scc-actions{grid-template-columns:1fr;}
+  .sentinel-app .scc-action{min-height:86px;}
+  .sentinel-app .scc-stats{gap:9px;}
+  .sentinel-app .scc-identity-sub{gap:8px;}
+  .sentinel-app .metric-card{padding:13px;}
+  .sentinel-app .metric-value{font-size:25px;}
+}
+@media (prefers-reduced-motion:reduce){
+ .sentinel-app .scc-action{transition:none;}
+}

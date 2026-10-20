@@ -1,0 +1,45 @@
+.ent360{border:1px solid #d8e8ee;border-radius:14px;background:#fff;margin:22px 0;overflow:hidden;color:#12384f}
+.ent360-title{display:flex;align-items:center;gap:12px;background:linear-gradient(110deg,#eaf5f9,#f7fbfd);padding:17px 20px;border-bottom:1px solid #dfeef2;color:#078bad}
+.ent360-title>div{display:grid;gap:4px;min-width:0}.ent360-title strong{font-size:16px;color:#10384f}.ent360-title span{font-size:11px;color:#69859a}.ent360-pill{margin-left:auto;background:#dff5f0;border:1px solid #bbe4df;border-radius:99px;padding:5px 9px;color:#127466!important;font-weight:800;white-space:nowrap}
+.ent360-evidence{display:flex;flex-wrap:wrap;gap:9px;padding:13px 18px;background:#f9fcfd;border-bottom:1px solid #e2edf2}
+.ent360-evidence>span{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:750;border:1px solid #d4e4eb;border-radius:8px;padding:8px 10px;background:#eff6f9;color:#47667b}
+.ent360-evidence>.ent360-good{background:#e9f9f3;color:#087b62;border-color:#bce8d7}.ent360-evidence>.ent360-warn{background:#fff3ed;color:#a95f3e;border-color:#f2d3c3}
+.ent360-tabs{display:flex;overflow-x:auto;overscroll-behavior-x:contain;border-bottom:1px solid #dce9f0;scrollbar-width:thin;background:#f5f9fc}
+.ent360-tabs button{padding:13px 12px;border:0;border-bottom:3px solid transparent;background:transparent;font-size:11.5px;white-space:nowrap;color:#667e91;font-weight:800;cursor:pointer;flex-shrink:0}
+.ent360-tabs button:hover{background:#e7f4f9;color:#0c6589}.ent360-tabs button.active{color:#0a779c;border-bottom-color:#0fabc3;background:#e8f8fb}.ent360-tabs button:focus-visible{outline:3px solid #19aecd;outline-offset:-3px}
+.ent360-body{padding:20px}.ent360-section-line{display:flex;gap:12px;align-items:start;justify-content:space-between;margin-bottom:16px}.ent360-section-line h3{font-size:16px;margin:0 0 5px;color:#173d53}.ent360-section-line p{font-size:11.5px;color:#768da0;line-height:1.5;margin:0}.ent360-section-line>span{display:inline-flex;gap:5px;align-items:center;color:#387d89;font-weight:700;font-size:11px;white-space:nowrap}
+.ent360-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.ent360-tile{background:#f7fafc;border:1px solid #e2edf3;border-radius:10px;padding:16px;min-width:0;display:grid;align-content:start;gap:7px}.ent360-tile>span{display:block;color:#678396;font-size:11.5px;font-weight:750}.ent360-tile>strong{color:#103d56;font-size:16px;line-height:1.35;overflow-wrap:anywhere}.ent360-tile>strong.ent360-missing{font-size:13px;color:#946943}.ent360-tile>small{font-size:11px;line-height:1.5;color:#8096a7}
+.ent360-warning{font-size:12px;color:#9e6633;display:flex;gap:9px;align-items:start;margin-top:14px;padding:12px;background:#fff8ed;border:1px solid #f2ddba;border-radius:8px}.ent360-warning svg{flex-shrink:0}.ent360-help{font-size:11.5px;color:#6a8899;line-height:1.6;margin:17px 0 2px;display:flex;gap:8px;align-items:start}.ent360-help svg{flex-shrink:0;margin-top:2px}
+.ent-shell[data-ent-theme='dark'] .ent360{background:#162c3e;color:#e4f4fa;border-color:#345368}.ent-shell[data-ent-theme='dark'] .ent360-title{background:linear-gradient(100deg,#1c4054,#183143);border-color:#365569}.ent-shell[data-ent-theme='dark'] .ent360-title strong,.ent-shell[data-ent-theme='dark'] .ent360-section-line h3,.ent-shell[data-ent-theme='dark'] .ent360-tile strong{color:#e6f5fb}.ent-shell[data-ent-theme='dark'] .ent360-evidence,.ent-shell[data-ent-theme='dark'] .ent360-tabs,.ent-shell[data-ent-theme='dark'] .ent360-tile{background:#19394c;border-color:#37586b}.ent-shell[data-ent-theme='dark'] .ent360-tabs button{color:#bbd5e3}.ent-shell[data-ent-theme='dark'] .ent360-tabs button.active{color:#a5f0ff;background:#1c4a5d}.ent-shell[data-ent-theme='dark'] .ent360-evidence>span{background:#254658;border-color:#406276;color:#d0e2ea}
+@media(max-width:700px){.ent360-tiles{grid-template-columns:1fr}.ent360-evidence{gap:6px}.ent360-title{padding:14px}.ent360-title .ent360-pill{display:none}.ent360-body{padding:14px}}
+
+
+/* UI Step 03 browser review: display all ten Server 360 tabs without
+   a tiny native horizontal scrollbar. Responsive wrapping is intentional. */
+.ent360-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  overflow-x: visible;
+  scrollbar-width: auto;
+  align-items: stretch;
+}
+.ent360-tabs button {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
+  min-height: 44px;
+  padding: 10px 8px;
+  text-align: center;
+}
+@media (max-width: 980px) {
+  .ent360-tabs {grid-template-columns: repeat(3, minmax(0, 1fr));}
+}
+@media (max-width: 520px) {
+  .ent360-tabs {grid-template-columns: repeat(2, minmax(0, 1fr));}
+}
+
+.ent360-source-label{margin:8px 0 16px;font-size:12px;color:var(--text-secondary,#61798e);line-height:1.5;overflow-wrap:anywhere}
+.ent360-records{margin-top:16px;padding:13px;border:1px solid rgba(127,158,184,.28);border-radius:10px;font-size:12px}
+.ent360-records p{font-size:12px;line-height:1.6}
+.ent360-record-row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:1px solid rgba(127,158,184,.18);margin-top:8px;padding-top:8px}

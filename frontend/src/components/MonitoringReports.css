@@ -1,0 +1,17 @@
+.mr-wrap{background:#fff;border:1px solid #e2eaf0;border-radius:15px;padding:24px;min-width:0}
+.mr-heading{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.mr-heading h2{margin:7px 0;font-size:23px;color:#14344b}
+.mr-heading p{color:#617587;font-size:13px;margin:0 0 22px}
+.mr-actions{display:flex;flex-wrap:wrap;align-items:center;gap:9px;font-size:13px}
+.mr-actions select{font:inherit;color:#183c53;border:1px solid #cbd9e2;border-radius:8px;padding:9px;background:white}
+.mr-actions button{display:inline-flex;align-items:center;gap:6px}
+.mr-summary{display:flex;align-items:center;gap:8px;padding:13px 14px;background:#eff7fa;border-radius:9px;color:#23536b;font-size:13px;margin:10px 0 16px}
+.mr-table-wrap{overflow-x:auto;border-radius:9px;border:1px solid #dbe6ed}
+.mr-table{width:100%;border-collapse:collapse;font-size:13px;min-width:850px}
+.mr-table th{color:#547086;text-align:left;background:#f3f7fa;font-weight:700;padding:13px 11px;white-space:nowrap}
+.mr-table td{padding:14px 11px;border-top:1px solid #e5edf2;color:#203f54}
+.mr-table td small{display:block;color:#8796a6;font-size:10px;margin-top:3px}
+.mr-table tbody tr:hover{background:#f8fbfc}
+.mr-error{color:#9d322a;background:#fff3f0;border-radius:8px;padding:12px}
+.mr-empty{display:flex;gap:10px;align-items:center;padding:20px;color:#60788c}
+.mr-caption{font-size:12px;color:#637989;line-height:1.6;margin:16px 0 0}

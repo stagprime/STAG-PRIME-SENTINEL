@@ -1,0 +1,26 @@
+.rc-panel{border:1px solid #dbe7ef;border-radius:12px;background:#fff;padding:18px;margin-top:16px;}
+.rc-header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:1px solid #e3ebf3;padding-bottom:14px;}
+.rc-header h3{display:flex;align-items:center;gap:9px;font-size:18px;color:#0b3650;margin:8px 0;}
+.rc-header p{color:#587083;font-size:13px;max-width:700px;margin:0;line-height:1.5;}
+.rc-header>span{font-size:11px;background:#e9f6f2;color:#166f58;padding:5px 9px;border-radius:6px;white-space:nowrap;}
+.rc-kicker{font-size:10px;letter-spacing:.09em;font-weight:800;color:#13718b;}
+.rc-body{padding-top:14px;display:flex;flex-direction:column;align-items:stretch;gap:10px;}
+.rc-body>label{font-size:12px;font-weight:700;color:#20445d;}
+.rc-body select{border:1px solid #c8dce7;border-radius:7px;background:#fff;color:#15364d;padding:10px;font:inherit;}
+.rc-code{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px;border-radius:7px;background:#092a44;color:#ddf0ff;word-break:break-all;}
+.rc-code code{font-size:12px;white-space:pre-wrap;}
+.rc-code button{background:transparent;border:1px solid #49647e;color:#fff;border-radius:6px;cursor:pointer;padding:5px;}
+.rc-buttons button,.rc-preview button{border:0;border-radius:7px;background:#0c4466;color:#fff;padding:10px 14px;display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;}
+.rc-body button:disabled{opacity:.4;cursor:not-allowed;}
+.rc-preview{padding:14px;border:1px solid #96c1d2;background:#eff8fc;border-radius:8px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;}
+.rc-preview strong{display:flex;align-items:center;gap:7px;color:#143a53;}
+.rc-preview p{font-size:12px;margin:0;color:#32566c;word-break:break-all;}
+.rc-checkbox{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:650;color:#143a53;}
+.rc-result{background:#e9f6ef;color:#134b38;padding:12px;border-radius:8px;}
+.rc-result pre{white-space:pre-wrap;font-size:12px;}
+.rc-result small{word-break:break-all;}
+.rc-error{display:flex;align-items:center;gap:6px;color:#a44e20;font-size:12px;}
+
+.rc-sudo-confirm{background:#fff5e9;border:1px solid #d4a26a;border-radius:8px;padding:12px;width:100%;display:flex;flex-direction:column;gap:8px;color:#693e16;}
+.rc-sudo-confirm label{font-size:12px;}
+.rc-sudo-confirm input{width:100%;max-width:360px;padding:10px;border:1px solid #c99b66;border-radius:6px;font:inherit;}
