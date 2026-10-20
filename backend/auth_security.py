@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 
 from backend.auth_models import AuthClientGrant, AuthSession, AuthUser, utcnow
 
-ROLES = {"admin", "staff", "client"}
+ROLES = {"admin", "staff", "client", "viewer"}
 PBKDF2_ITERATIONS = 600_000
 MAX_LOGIN_ATTEMPTS = 5
 LOCKOUT_MINUTES = 15
@@ -137,7 +137,7 @@ def revoke_session(db: Session, record: AuthSession) -> None:
 def can_access_client(db: Session, user: AuthUser, client_id: str) -> bool:
     if not client_id or not user.is_active:
         return False
-    if user.role == "admin":
+    if user.role in ("admin", "viewer"):
         return True
     if user.role == "client":
         return bool(user.client_id and user.client_id == client_id)

@@ -175,7 +175,6 @@ function Executive({inventory,overview,onNavigate,onOpenServer,scope}:{inventory
   const count=verifiedSessions(metrics,running)
   const fresh=running?metrics.filter(sourceFresh):[]
   const healthy=fresh.filter(s=>s.status==='healthy').length
-  const attention=metrics.filter(s=>s.status==='degraded'||s.status==='unreachable').length
   const highAlerts=buildHighAlerts(overview).filter(a=>ids.has(a.server_id)||a.code==='worker_offline')
   const [cardFocus,setCardFocus]=useState<string|null>(null)
   // Backend-supported summary windows only. These are aggregates, NOT time-series data.

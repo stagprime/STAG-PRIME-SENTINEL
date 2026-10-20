@@ -2,7 +2,7 @@
 // CSRF token lives only in this JavaScript page's memory (refresh gets a fresh
 // copy from /api/auth/session). Authentication cookie is invisible to JS.
 let csrfToken: string | null = null;
-export type UserRole = 'admin' | 'staff' | 'client';
+export type UserRole = 'admin' | 'staff' | 'client' | 'viewer';
 export interface AuthUser {
   id: string;
   username: string;

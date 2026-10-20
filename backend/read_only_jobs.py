@@ -18,7 +18,7 @@ from paramiko.ssh_exception import AuthenticationException, BadHostKeyException,
 from pydantic import BaseModel, ConfigDict
 
 from backend.admin_access import (
-    ServerAdminAudit, ServerAdminProfile, _require_admin, _safe_profile,
+    ServerAdminAudit, ServerAdminProfile, _require_admin, _require_reader, _safe_profile,
 )
 from backend.database import Server, SessionLocal
 from backend.server_control import _audit_registry_ready
@@ -160,7 +160,7 @@ def _finish_audit(audit_id: int, result: str) -> None:
 
 
 @router.get('/diagnostics/catalog')
-def diagnostic_catalog(admin=Depends(_require_admin)):
+def diagnostic_catalog(admin=Depends(_require_reader)):
     return {
         'read_only_execution_enabled': True,
         'arbitrary_commands_enabled': False,

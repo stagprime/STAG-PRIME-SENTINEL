@@ -51,7 +51,7 @@
 .um-person strong{color:#0e3150;font-size:12px;line-height:1.5;display:block;}
 .um-person small{color:#8697aa;font-size:10px;display:block;}
 .um-role{display:inline-flex;align-items:center;gap:5px;border-radius:6px;padding:6px 9px;font-size:10px;font-weight:800;white-space:nowrap;}
-.um-role-admin{background:#e9effd;color:#3454a8;}.um-role-staff{background:#eaf9fd;color:#0f7491;}.um-role-client{background:#f3f0ff;color:#7657aa;}
+.um-role-admin{background:#e9effd;color:#3454a8;}.um-role-viewer{background:#eef8f1;color:#1d7a45;}.um-role-staff{background:#eaf9fd;color:#0f7491;}.um-role-client{background:#f3f0ff;color:#7657aa;}
 .um-access{max-width:200px;line-height:1.5;font-size:11px;font-weight:680;color:#314d65;white-space:normal;}
 .um-table td > small{color:#9aabc0;font-size:10px;}
 .um-status{font-size:10px;font-weight:800;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}

@@ -30,8 +30,30 @@ class SSHConnectionConfig:
     known_hosts_path: str | None = None
 
 
+def _pin_store() -> Path:
+    return Path(__file__).resolve().parent.parent / 'data' / 'known_hosts'
+
+
+class _PinFirstSeenHost(paramiko.MissingHostKeyPolicy):
+    """Store a host key the first time it is seen. A later change still fails closed."""
+
+    def __init__(self, path: Path):
+        self.path = path
+
+    def missing_host_key(self, client, hostname, key):
+        client.get_host_keys().add(hostname, key.get_name(), key)
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        with self.path.open('a', encoding='utf-8') as handle:
+            handle.write(f'{hostname} {key.get_name()} {key.get_base64()}\n')
+        try:
+            self.path.chmod(0o600)
+        except OSError:
+            pass
+        _LOG.info('Pinned first-seen SSH host key for %s', hostname)
+
+
 def _connect_verified(config: SSHConnectionConfig, key_passphrase: str | None = None) -> paramiko.SSHClient:
-    """Open SSH connection; reject new or mismatched server host keys."""
+    """Open SSH. A changed host key is rejected. A never-seen host is pinned once."""
     vault_secret = None
     key_path = None
     if config.private_key_path.startswith('sentinel-vault:'):
@@ -57,7 +79,12 @@ def _connect_verified(config: SSHConnectionConfig, key_passphrase: str | None = 
                 if not known_hosts.is_file():
                     raise FileNotFoundError("SSH known_hosts file not found")
                 client.load_host_keys(str(known_hosts))
-            client.set_missing_host_key_policy(paramiko.RejectPolicy())
+                client.set_missing_host_key_policy(paramiko.RejectPolicy())
+            else:
+                pin_path = _pin_store()
+                if pin_path.is_file():
+                    client.load_host_keys(str(pin_path))
+                client.set_missing_host_key_policy(_PinFirstSeenHost(pin_path))
             connection = dict(
                 hostname=config.host, port=config.port, username=config.username,
                 look_for_keys=False, allow_agent=False,

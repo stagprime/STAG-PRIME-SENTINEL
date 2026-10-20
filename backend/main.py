@@ -52,6 +52,39 @@ async def prevent_api_response_caching(request, call_next):
     return response
 
 
+_VIEWER_SAFE_WRITES = {
+    ('POST', '/api/auth/logout'),
+    ('POST', '/api/auth/logout-cookie'),
+    ('POST', '/api/geoip/lookup'),
+}
+
+
+def _signed_in_role(request) -> str | None:
+    from backend.auth_security import lookup_session
+    header = request.headers.get('authorization', '')
+    token = header[7:].strip() if header.lower().startswith('bearer ') else request.cookies.get('sentinel_session')
+    if not token:
+        return None
+    try:
+        with SessionLocal() as db:
+            found = lookup_session(db, token)
+    except Exception:
+        return None
+    return found[0].role if found else None
+
+
+@app.middleware('http')
+async def viewer_cannot_change(request, call_next):
+    """View accounts may open every read API. Writes stay administrator-only."""
+    if request.method in {'POST', 'PUT', 'PATCH', 'DELETE'}:
+        path = request.url.path.rstrip('/') or '/'
+        if (request.method, path) not in _VIEWER_SAFE_WRITES and _signed_in_role(request) == 'viewer':
+            return JSONResponse(status_code=403, content={
+                'detail': 'View accounts can look through every area but cannot add or change anything.',
+            })
+    return await call_next(request)
+
+
 
 # Every server-scoped API checks permissions SERVER-SIDE. No frontend-only RBAC.
 def require_admin(current=Depends(require_current_session)):
@@ -63,7 +96,7 @@ def require_admin(current=Depends(require_current_session)):
 
 def scoped_client_ids(db, user: AuthUser):
     """None = admin sees all; [] = no grants. Client names are not authorization IDs."""
-    if user.role == 'admin':
+    if user.role in ('admin', 'viewer'):
         return None
     if user.role == 'client':
         return [user.client_id] if user.client_id else []

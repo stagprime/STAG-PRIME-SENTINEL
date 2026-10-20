@@ -113,13 +113,20 @@ def _require_admin(current=Depends(require_current_session)):
     return user
 
 
+def _require_reader(current=Depends(require_current_session)):
+    user, _session = current
+    if user.role not in ('admin', 'viewer') or not user.is_active:
+        raise HTTPException(status_code=403, detail='This view is limited to administrators and view accounts')
+    return user
+
+
 def _tables_ready() -> bool:
     existing = set(inspect(engine).get_table_names())
     return {'server_admin_profiles', 'server_admin_audit'} <= existing
 
 
 @router.get('/operations-audit')
-def list_operations_audit(limit: int = 80, admin=Depends(_require_admin)):
+def list_operations_audit(limit: int = 80, admin=Depends(_require_reader)):
     """Recent privileged-operation audit rows. No keys, hosts, or command text."""
     from sqlalchemy import select
     if not 1 <= limit <= 200:
@@ -166,7 +173,7 @@ def _safe_profile(server: Server, profile: ServerAdminProfile | None) -> dict[st
 
 
 @router.get('/admin-profiles')
-def admin_profiles(admin=Depends(_require_admin)):
+def admin_profiles(admin=Depends(_require_reader)):
     if not _tables_ready():
         return {'total': 0, 'profiles': [], 'initialized': False}
     with SessionLocal() as db:

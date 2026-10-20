@@ -141,7 +141,7 @@ def permitted_clients(response: Response, current=Depends(require_current_sessio
     """Proof of server-side role/client scoping; not a replacement for API guards."""
     response.headers["Cache-Control"] = "no-store"
     user, _ = current
-    if user.role == "admin":
+    if user.role in ("admin", "viewer"):
         query = select(Client.id, Client.name).order_by(Client.name)
     elif user.role == "staff":
         query = (select(Client.id, Client.name)

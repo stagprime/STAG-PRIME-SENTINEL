@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict
 
-from backend.admin_access import _require_admin
+from backend.admin_access import _require_admin, _require_reader
 from backend.alert_notify import recent_alerts, set_webhook_url, validate_webhook_url, webhook_locked_by_env, webhook_status
 
 router = APIRouter(prefix='/api/integrations', tags=['Integrations'])
@@ -15,7 +15,7 @@ class WebhookBody(BaseModel):
 
 
 @router.get('/alerts')
-def integration_alerts(admin=Depends(_require_admin)):
+def integration_alerts(admin=Depends(_require_reader)):
     status = webhook_status()
     recent = []
     for row in recent_alerts(40):

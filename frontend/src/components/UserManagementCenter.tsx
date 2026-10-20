@@ -41,11 +41,11 @@ function readableError(error: unknown): string {
   return error instanceof Error ? error.message : 'Request failed. Please try again.';
 }
 function roleTitle(role: UserRole): string {
-  return role === 'admin' ? 'Administrator' : role === 'staff' ? 'Staff' : 'Client';
+  return role === 'admin' ? 'Administrator' : role === 'viewer' ? 'View' : role === 'staff' ? 'Staff' : 'Client';
 }
 function RoleBadge({ role }: { role: UserRole }) {
   return <span className={`um-role um-role-${role}`}>
-    {role === 'admin' ? <ShieldCheck size={13}/> : role === 'staff' ? <UserCog size={13}/> : <Building2 size={13}/>}
+    {role === 'admin' ? <ShieldCheck size={13}/> : role === 'viewer' ? <Eye size={13}/> : role === 'staff' ? <UserCog size={13}/> : <Building2 size={13}/>}
     {roleTitle(role)}
   </span>;
 }
@@ -112,7 +112,9 @@ export default function UserManagementCenter({ currentUser }: { currentUser: Aut
   const admins = users.filter(u => u.role === 'admin' && u.is_active).length;
   const active = users.filter(u => u.is_active).length;
   const staff = users.filter(u => u.role === 'staff').length;
+  const viewers = users.filter(u => u.role === 'viewer').length;
   const clientUsers = users.filter(u => u.role === 'client').length;
+  const readOnly = currentUser.role === 'viewer';
 
   function open(mode: Exclude<EditMode, null>, user: ManagedUser | null = null) {
     setMessage(''); setError(''); setShowPassword(false); setConfirmStatus(false);
@@ -223,12 +225,13 @@ export default function UserManagementCenter({ currentUser }: { currentUser: Aut
   }
   function accessDescription(user: ManagedUser) {
     if (user.role === 'admin') return 'All organizations';
+    if (user.role === 'viewer') return 'View only · every area';
     if (user.role === 'client') return clientById.get(user.client_id ?? '') ?? 'Organization not found';
     if (user.client_ids.length === 0) return 'No client access';
     const names = user.client_ids.map(id => clientById.get(id) ?? 'Unknown client');
     return names.length > 2 ? `${names.slice(0, 2).join(', ')} +${names.length - 2}` : names.join(', ');
   }
-  if (currentUser.role !== 'admin') {
+  if (currentUser.role !== 'admin' && currentUser.role !== 'viewer') {
     return <div className="um-panel um-noaccess"><LockKeyhole size={25}/><h2>Administrator access required</h2><p>User Management is protected by the backend.</p></div>;
   }
   return <div className="um-page">
@@ -243,14 +246,14 @@ export default function UserManagementCenter({ currentUser }: { currentUser: Aut
       <div><UsersRound size={19}/><small>Total users</small><strong>{users.length.toString().padStart(2, '0')}</strong><span>Registered accounts</span></div>
       <div><UserRoundCheck size={19}/><small>Active accounts</small><strong>{active.toString().padStart(2, '0')}</strong><span>Enabled for sign in</span></div>
       <div><ShieldCheck size={19}/><small>Active admins</small><strong>{admins.toString().padStart(2, '0')}</strong><span>Protected from lockout</span></div>
-      <div><Building2 size={19}/><small>Staff / client users</small><strong>{staff} / {clientUsers}</strong><span>{clients.length} organizations in registry</span></div>
+      <div><Building2 size={19}/><small>Staff / view / client</small><strong>{staff} / {viewers} / {clientUsers}</strong><span>{clients.length} organizations in registry</span></div>
     </div>
     <div className="um-panel">
       <div className="um-panel-head">
         <div><Label>SECURE ACCESS CONTROL</Label><h3>User directory</h3><p>Manage authorized accounts without exposing passwords, tokens or SSH credentials.</p></div>
         <div className="um-panel-actions">
           <button className="um-outline" type="button" onClick={() => { void refreshDirectory(); if (tab === 'audit') void refreshAudit(); }} disabled={loading || busy}><RefreshCcw size={16}/> Refresh</button>
-          <button className="um-primary" type="button" onClick={() => open('create')}><Plus size={17}/> Create user</button>
+          {!readOnly && <button className="um-primary" type="button" onClick={() => open('create')}><Plus size={17}/> Create user</button>}
         </div>
       </div>
       <div className="um-tabs" role="tablist" aria-label="User administration">
@@ -262,19 +265,19 @@ export default function UserManagementCenter({ currentUser }: { currentUser: Aut
       {tab === 'directory' ? <>
         <div className="um-toolbar">
           <div className="um-search"><Search size={17}/><input aria-label="Search users" placeholder="Search name, username or client..." value={query} onChange={e => setQuery(e.target.value)}/></div>
-          <select aria-label="Filter account role" value={roleFilter} onChange={e => setRoleFilter(e.target.value as typeof roleFilter)}><option value="all">All roles</option><option value="admin">Administrators</option><option value="staff">Staff</option><option value="client">Clients</option></select>
+          <select aria-label="Filter account role" value={roleFilter} onChange={e => setRoleFilter(e.target.value as typeof roleFilter)}><option value="all">All roles</option><option value="admin">Administrators</option><option value="viewer">View</option><option value="staff">Staff</option><option value="client">Clients</option></select>
           <span className="um-results">{filtered.length} of {users.length} accounts</span>
         </div>
         <div className="um-table-wrap"><table className="um-table"><thead><tr><th>ACCOUNT</th><th>ROLE</th><th>ORGANIZATION ACCESS</th><th>STATUS</th><th>MANAGE</th></tr></thead><tbody>
           {!loading && filtered.map(user => <tr key={user.id}><td><div className="um-person"><div className="um-avatar">{(user.display_name || user.username).slice(0, 1).toUpperCase()}</div><div><strong>{user.display_name}</strong><small>@{user.username}{user.id === currentUser.id ? ' · You' : ''}</small></div></div></td>
             <td><RoleBadge role={user.role}/></td><td><div className="um-access" title={accessDescription(user)}>{accessDescription(user)}</div>{user.role === 'staff' && <small>{user.client_ids.length} explicit client grant{user.client_ids.length === 1 ? '' : 's'}</small>}</td>
             <td><span className={`um-status ${user.is_active ? 'on' : 'off'}`}><i/>{user.is_active ? 'Active' : 'Disabled'}</span></td>
-            <td><div className="um-actions"><button type="button" onClick={() => open('edit', user)} title={`Edit ${user.username}`}><UserCog size={15}/> Edit</button>
+            <td><div className="um-actions">{readOnly ? <span>View only</span> : <><button type="button" onClick={() => open('edit', user)} title={`Edit ${user.username}`}><UserCog size={15}/> Edit</button>
               {user.role === 'staff' && <button type="button" onClick={() => open('grants', user)} title="Assign client access"><Building2 size={15}/> Grants</button>}
               {user.id !== currentUser.id && <button type="button" onClick={() => open('reset', user)} title="Reset password"><KeyRound size={15}/> Reset</button>}
               {user.id !== currentUser.id && <button type="button" onClick={() => open('status', user)} title={user.is_active ? 'Disable account' : 'Enable account'}>{user.is_active ? <LockKeyhole size={15}/> : <Check size={15}/>} {user.is_active ? 'Disable' : 'Enable'}</button>}
               {user.id !== currentUser.id && !user.is_active && <button className="um-delete-button" type="button" onClick={() => open('delete', user)} title={`Permanently delete ${user.username}`}><Trash2 size={15}/> Delete</button>}
-            </div></td></tr>)}
+            </>}</div></td></tr>)}
           {!loading && filtered.length === 0 && <tr><td colSpan={5} className="um-empty">No accounts match the current filters.</td></tr>}
           {loading && <tr><td colSpan={5} className="um-empty">Loading accounts from the protected API…</td></tr>}
         </tbody></table></div>
@@ -294,10 +297,11 @@ export default function UserManagementCenter({ currentUser }: { currentUser: Aut
             {(editMode === 'create' || editMode === 'edit') && <>
               {editMode === 'create' && <label className="um-field">Username<input required minLength={3} maxLength={80} autoComplete="off" placeholder="e.g. supportteam01" value={draft.username} onChange={e => setDraft({ ...draft, username: e.target.value })}/><small>Must be unique. Use lowercase letters and numbers.</small></label>}
               <label className="um-field">Display name<input required minLength={2} maxLength={120} value={draft.display_name} onChange={e => setDraft({ ...draft, display_name: e.target.value })}/></label>
-              <label className="um-field">Account role<select value={draft.role} disabled={editMode === 'edit' && target?.id === currentUser.id} onChange={e => setDraft({ ...draft, role: e.target.value as UserRole, confirm_admin_access: false })}><option value="staff">Staff — explicitly granted clients only</option><option value="client">Client — one organization only</option><option value="admin">Administrator — all organizations</option></select></label>
+              <label className="um-field">Account role<select value={draft.role} disabled={editMode === 'edit' && target?.id === currentUser.id} onChange={e => setDraft({ ...draft, role: e.target.value as UserRole, confirm_admin_access: false })}><option value="staff">Staff — explicitly granted clients only</option><option value="viewer">View — every area, cannot add or change</option><option value="client">Client — one organization only</option><option value="admin">Administrator — all organizations</option></select></label>
               {draft.role === 'client' && <label className="um-field">Assigned organization<select required value={draft.client_id} onChange={e => setDraft({ ...draft, client_id: e.target.value })}><option value="">Choose client organization</option>{clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label>}
               {draft.role === 'staff' && editMode === 'create' && <div className="um-grants"><strong>Staff client access</strong><p>Select only the organizations this staff member is allowed to monitor. None selected means no client access.</p>{clients.length === 0 ? <small>No organizations available yet.</small> : clients.map(c => <label key={c.id}><input type="checkbox" checked={draft.client_ids.includes(c.id)} onChange={() => toggleClient(c.id)}/> {c.name}</label>)}</div>}
               {draft.role === 'staff' && editMode === 'edit' && <p className="um-hint">After changing this account to Staff, use the separate <strong>Grants</strong> action to assign clients. No automatic access is granted.</p>}
+              {draft.role === 'viewer' && <p className="um-hint">This account can open every area and click through it. The server rejects every add, edit, delete, and SSH change.</p>}
               {draft.role === 'admin' && (editMode === 'create' || target?.role !== 'admin') && <label className="um-check-warning"><input type="checkbox" required checked={draft.confirm_admin_access} onChange={e => setDraft({ ...draft, confirm_admin_access: e.target.checked })}/> I explicitly approve administrator access to every client and server.</label>}
               {editMode === 'create' && <label className="um-field">Temporary initial password<div className="um-passfield"><input required minLength={14} maxLength={128} autoComplete="new-password" type={showPassword ? 'text' : 'password'} value={draft.password} onChange={e => setDraft({ ...draft, password: e.target.value })} placeholder="14–128 characters"/><button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(prev => !prev)}>{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}</button></div><small>Never share passwords in chat or screenshots. Use a secure channel.</small></label>}
             </>}

@@ -184,7 +184,7 @@ body {background:var(--canvas);}
 .sentinel-login .login-story-content p{font-size:13px;line-height:1.75;}
 .sentinel-login .login-points{gap:13px;margin-top:32px;font-size:12px;}
 .sentinel-login .login-auth h2{font-size:31px;}
-.sentinel-login .login-auth-box{max-width:430px;}
+.sentinel-login .login-auth-box{max-width:460px;}
 .sentinel-login .login-input-wrap{min-height:45px;border-radius:8px;}
 .sentinel-login .login-input-wrap input{height:44px;}
 .sentinel-login .login-submit{min-height:43px;padding:10px 14px;border-radius:8px;box-shadow:none;}

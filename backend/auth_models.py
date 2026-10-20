@@ -19,7 +19,7 @@ class AuthUser(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
     username: Mapped[str] = mapped_column(String(80), unique=True, nullable=False, index=True)
     display_name: Mapped[str] = mapped_column(String(120), nullable=False)
-    role: Mapped[str] = mapped_column(String(10), nullable=False)  # admin, staff, client
+    role: Mapped[str] = mapped_column(String(10), nullable=False)  # admin, staff, client, viewer
     client_id: Mapped[str | None] = mapped_column(ForeignKey("clients.id"), nullable=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)

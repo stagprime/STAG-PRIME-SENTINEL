@@ -18,7 +18,7 @@ from pydantic import BaseModel, ConfigDict, Field, SecretStr
 from sqlalchemy import DateTime, ForeignKey, Integer, LargeBinary, String, UniqueConstraint, select
 from sqlalchemy.orm import Mapped, mapped_column
 
-from backend.admin_access import ServerAdminAudit, _require_admin
+from backend.admin_access import ServerAdminAudit, _require_admin, _require_reader
 from backend.credential_vault import _local_only, _master_key
 from backend.database import Base, Server, SessionLocal, engine
 
@@ -127,7 +127,7 @@ def _existing_server(db, server_id):
 
 
 @router.get('/servers/{server_id}/openvpn-profiles')
-def list_openvpn_profiles(server_id: str, actor=Depends(_require_admin)):
+def list_openvpn_profiles(server_id: str, actor=Depends(_require_reader)):
     with SessionLocal() as db:
         _existing_server(db, server_id)
         # create if needed only after admin authentication and server existence

@@ -31,7 +31,7 @@ import MonitoringLive from './components/MonitoringLive'
 import InventorySSHEnrollment from './components/InventorySSHEnrollment'
 import './components/InventorySSHEnrollment.css'
 import ClientDirectory from './components/ClientDirectory'
-import { fetchClients } from './api/clientDirectory'
+import { createClient, fetchClients } from './api/clientDirectory'
 import type { ClientDirectoryEntry } from './api/clientDirectory'
 import { getMonitoringOverview } from './api/monitoring'
 import type { MonitoringOverview } from './api/monitoring'
@@ -69,7 +69,7 @@ const LEGACY_ROUTE_REDIRECTS:Record<string,Section> = {
   '/install-center':'install-center',
 }
 function canAccessPage(page:Section,role:AuthUser['role']) {
-  return role==='admin' || !(['users','operations-repair','operations-control','audit','integrations'] as Section[]).includes(page)
+  return role==='admin' || role==='viewer' || !(['users','operations-repair','operations-control','audit','integrations'] as Section[]).includes(page)
 }
 function sectionFromHash(hash:string,role:AuthUser['role']):Section {
   const route=(hash.startsWith('#')?hash.slice(1):hash).replace(/\/+$/,'').toLowerCase() || '/'
@@ -296,6 +296,8 @@ function App({ currentUser, onSignOut }: { currentUser: AuthUser; onSignOut: () 
   const [newOpen, setNewOpen] = useState(false)
   const [orgOptions, setOrgOptions] = useState<ClientDirectoryEntry[]>([])
   const [orgOptionsError, setOrgOptionsError] = useState<string | null>(null)
+  const [orgDraftName, setOrgDraftName] = useState('')
+  const [orgSaving, setOrgSaving] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [profileMenuOpen, setProfileMenuOpen] = useState(false)
   const [profileDetailsOpen, setProfileDetailsOpen] = useState(false)
@@ -794,6 +796,23 @@ useEffect(() => {
     // Writing a different hash creates a browser-history entry and emits hashchange.
     if (window.location.hash !== destination) window.location.hash = destination
   }
+  async function createOrganization() {
+    const name = orgDraftName.trim()
+    if (name.length < 2 || orgSaving) return
+    setOrgSaving(true)
+    setOrgOptionsError(null)
+    try {
+      const created = await createClient({ name, contact_email: null })
+      setOrgOptions((prev) => [...prev.filter((item) => item.id !== created.id), created].sort((a, b) => a.name.localeCompare(b.name)))
+      setDraft((prev) => ({ ...prev, client: created.name }))
+      setOrgDraftName('')
+    } catch (err) {
+      setOrgOptionsError(err instanceof Error ? err.message : 'Could not create the organization')
+    } finally {
+      setOrgSaving(false)
+    }
+  }
+
   async function addServer(e: FormEvent) {
     e.preventDefault()
     if (savingServer) return
@@ -950,7 +969,7 @@ useEffect(() => {
         <div className="sp-account-foot">Stag Prime Sentinel · Protected workspace</div>
       </div>}
     </div></div></header>
-      <main className="main-content"><div className="page-heading"><div><div className="eyebrow"><span/> STAG PRIME SENTINEL / {section.toUpperCase()}</div><h1>{HEADINGS[section].title}</h1><p>{HEADINGS[section].desc}</p></div><div className="heading-actions">{currentUser.role === 'admin' && section === 'servers' && <button className="btn-primary" onClick={() => setNewOpen(true)}><Plus size={18}/> Add server</button>}</div></div>
+      <main className="main-content"><div className="page-heading"><div><div className="eyebrow"><span/> STAG PRIME SENTINEL / {section.toUpperCase()}</div><h1>{HEADINGS[section].title}</h1><p>{HEADINGS[section].desc}</p></div><div className="heading-actions">{currentUser.role === 'admin' && section === 'servers' && <button className="btn-primary" onClick={() => setNewOpen(true)}><Plus size={18}/> Add server</button>}</div></div>{currentUser.role === 'viewer' && <p className="secure-form-note" style={{margin:'12px 0 0'}}><ShieldCheck size={18}/> View only. Every area is open to look at. Adding, editing, deleting, and SSH changes stay off.</p>}
         {(['dashboard','live','map','vpn-services','network','performance','security','audit'] as Section[]).includes(section) &&
           <EnterpriseWorkspace page={section as EnterprisePage} inventory={servers.map(s=>({id:s.id,name:s.name,host:s.host,client:s.client,country:s.country,region:s.region,provider:s.provider}))} overview={monitoringOverview} inventoryReady={inventoryApiStatus==='connected'} onOpenServer={setSelected} onNavigate={key=>moveTo(key as Section)} refresh={()=>setHealthRefresh(n=>n+1)} scope={globalScope} onScopeChange={setGlobalScope}/>}
         {section === 'servers' && <>
@@ -997,18 +1016,20 @@ useEffect(() => {
             />
           }
         </>}
-        {section === 'operations-repair' && currentUser.role === 'admin' &&
+        {(currentUser.role === 'admin' || currentUser.role === 'viewer') && section === 'operations-repair' &&
           <ServerOperations
             servers={operationsServers}
             inventoryStatus={inventoryApiStatus}
+            readOnly={currentUser.role === 'viewer'}
             onOpenInventory={() => moveTo('servers')}
             onAddServer={() => setNewOpen(true)}
             onOpenHandbook={() => moveTo('install-center')}
             onRefresh={() => { void refreshInventory().catch(() => setInventoryApiStatus('offline')); setHealthRefresh(n => n + 1) }}
           />}
-        {section === 'operations-control' && currentUser.role === 'admin' && <ServerControlCenter
+        {(currentUser.role === 'admin' || currentUser.role === 'viewer') && section === 'operations-control' && <ServerControlCenter
           servers={controlServers}
           inventoryStatus={inventoryApiStatus}
+          readOnly={currentUser.role === 'viewer'}
           onOpenInventory={() => moveTo('servers')}
           onRefresh={() => { void refreshInventory().catch(() => setInventoryApiStatus('offline')); setHealthRefresh(n => n + 1) }}
         />}
@@ -1041,11 +1062,11 @@ useEffect(() => {
         )}
         {section === 'reports' && <EnterpriseReports/>}
         {section === 'clients' && <><Client360 servers={servers.map(s=>({id:s.id,name:s.name,client:s.client,region:s.region,provider:s.provider}))} overview={monitoringOverview} onOpenServer={setSelected}/><ClientDirectory isAdmin={currentUser.role==='admin'} onChange={() => { void refreshInventory().catch(()=>setInventoryApiStatus('offline')) }}/></>}
-        {section === 'users' && (currentUser.role === 'admin' ? <UserManagementCenter currentUser={currentUser}/> : <div className="panel standalone-panel">Administrator access required.</div>)}
-        {section === 'install-center' && (currentUser.role === 'admin' ? <InstallationCenter/> : <div className="panel standalone-panel" style={{padding:32}}>The installation handbook is restricted to administrators in this version.</div>)}
+        {section === 'users' && (currentUser.role === 'admin' || currentUser.role === 'viewer' ? <UserManagementCenter currentUser={currentUser}/> : <div className="panel standalone-panel">Administrator access required.</div>)}
+        {section === 'install-center' && (currentUser.role === 'admin' || currentUser.role === 'viewer' ? <InstallationCenter/> : <div className="panel standalone-panel" style={{padding:32}}>The installation handbook is restricted to administrators in this version.</div>)}
         {section === 'onboarding' && <OnboardingCenter isAdmin={currentUser.role === 'admin'} onOpenInstall={() => moveTo('install-center')} onOpenInventory={() => moveTo('servers')} />}
         {section === 'settings' && <EnterpriseSettings overview={monitoringOverview} inventoryReady={inventoryApiStatus==='connected'} theme={theme} onThemeChange={setTheme} isAdmin={currentUser.role==='admin'} onOpenIntegrations={()=>moveTo('integrations')}/>}
-        {section === 'integrations' && <IntegrationsCenter/>}
+        {section === 'integrations' && <IntegrationsCenter readOnly={currentUser.role === 'viewer'}/>}
         <div className="footerline"><span>© 2026 Stag Prime LLC · Sentinel Control Center</span><span><span className="footer-dot"/> Dynamic read-only SSH monitoring · Background collector · verify worker status</span></div>
       </main>
     </div>
@@ -1081,6 +1102,7 @@ useEffect(() => {
             setPasswordBusy(false)
           }
         }}>
+          {currentUser.role === 'viewer' ? <><p className="secure-form-note">This view account cannot change its password. An administrator can reset it.</p><div className="modal-actions" style={{padding:'16px 0 25px'}}><button type="button" className="btn-secondary" onClick={() => setProfileDetailsOpen(false)}>Close</button></div></> : <>
           <MiniLabel>CHANGE PASSWORD</MiniLabel>
           <div className="form-grid" style={{marginTop:10}}>
             <label>Current password<input type="password" autoComplete="current-password" required value={passwordForm.current} onChange={e => setPasswordForm(v => ({...v, current: e.target.value}))}/></label>
@@ -1094,6 +1116,7 @@ useEffect(() => {
             <button type="button" className="btn-secondary" disabled={passwordBusy} onClick={() => setProfileDetailsOpen(false)}>Close</button>
             <button type="submit" className="btn-primary" disabled={passwordBusy}>{passwordBusy ? 'Updating…' : 'Update password'}</button>
           </div>
+          </>}
         </form>
       </div>
     </div>}
@@ -1144,26 +1167,22 @@ useEffect(() => {
                 required
                 value={draft.client}
                 onChange={(e) => setDraft({ ...draft, client: e.target.value })}
-                disabled={orgOptions.length === 0}
               >
-                {orgOptions.length === 0 ? (
-                  <option value="">No organizations yet — create one under Clients</option>
-                ) : (
-                  <>
-                    <option value="" disabled>Select organization…</option>
-                    {orgOptions.map((org) => (
-                      <option key={org.id} value={org.name}>{org.name}</option>
-                    ))}
-                  </>
-                )}
+                <option value="">{orgOptions.length === 0 ? 'No organization yet' : 'Select organization…'}</option>
+                {orgOptions.map((org) => (
+                  <option key={org.id} value={org.name}>{org.name}</option>
+                ))}
               </select>
             </label>
+            <div className="sp-form-split">
+              <label>New organization
+                <input maxLength={150} placeholder="Type a name, then create" value={orgDraftName} onChange={(e) => setOrgDraftName(e.target.value)} />
+              </label>
+              <label>Create
+                <button type="button" className="btn-secondary" disabled={orgSaving || orgDraftName.trim().length < 2} onClick={() => { void createOrganization() }}>{orgSaving ? 'Creating…' : 'Add to list'}</button>
+              </label>
+            </div>
             {orgOptionsError && <p className="sentinel-credential-hint" style={{margin:0,color:'#a13530'}}>{orgOptionsError}</p>}
-            {!orgOptionsError && orgOptions.length === 0 && (
-              <p className="sentinel-credential-hint" style={{margin:0}}>
-                Create an organization under <strong>Clients &amp; Organizations</strong>, then open Add server again.
-              </p>
-            )}
             <label>Cloud provider<input maxLength={150} placeholder="Hetzner, Oracle, AWS…" value={draft.provider} onChange={e=>setDraft({...draft,provider:e.target.value})}/></label>
           </div>
           <div className="sp-form-step"><span>2</span><div><strong>SSH access</strong><small>Encrypted vault · used only for read-only live collection</small></div></div>

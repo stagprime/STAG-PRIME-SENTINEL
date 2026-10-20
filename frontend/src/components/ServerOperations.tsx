@@ -44,7 +44,7 @@ function labelForMonitoring(stage: OperationsServer['monitoring']) {
 }
 
 export default function ServerOperations({
-  servers, inventoryStatus, onOpenInventory, onAddServer, onOpenHandbook, onRefresh,
+  servers, inventoryStatus, onOpenInventory, onAddServer, onOpenHandbook, onRefresh, readOnly = false,
 }: {
   servers: OperationsServer[]
   inventoryStatus: 'loading' | 'connected' | 'offline'
@@ -52,6 +52,7 @@ export default function ServerOperations({
   onAddServer: () => void
   onOpenHandbook: () => void
   onRefresh: () => void
+  readOnly?: boolean
 }) {
   const [search, setSearch] = useState('')
   const [client, setClient] = useState('all')
@@ -267,7 +268,7 @@ export default function ServerOperations({
           {inventoryStatus === 'connected' && filtered.map(s => <button type="button" key={s.id} className={'so-server' + (s.id === selected?.id ? ' selected' : '')} aria-pressed={s.id === selected?.id} onClick={() => {setSelectedId(s.id);setCopied(false)}}><span className="so-server-icon"><Server size={17}/></span><span className="so-server-text"><strong>{s.name}</strong><small>{s.client} · {s.host}</small><em className={'so-monitoring ' + s.monitoring}>{labelForMonitoring(s.monitoring)}</em></span><ChevronRight size={16}/></button>)}
           {inventoryStatus === 'connected' && !filtered.length && <div className="so-empty"><ShieldCheck size={21}/>{!showAllOnRepair ? 'No health-collector errors currently reported. This is not proof that every VPN works.' : 'No matching servers in the active inventory.'}</div>}
         </div>
-        <footer className="so-panel-foot"><button onClick={onOpenInventory}>Manage server inventory <ArrowRight size={15}/></button><button onClick={onAddServer}><ServerCog size={14}/> Add new server</button></footer>
+        <footer className="so-panel-foot"><button onClick={onOpenInventory}>Manage server inventory <ArrowRight size={15}/></button>{!readOnly && <button onClick={onAddServer}><ServerCog size={14}/> Add new server</button>}</footer>
       </section>
 
       <section className="so-detail">
@@ -291,7 +292,7 @@ export default function ServerOperations({
               </p> : <p className="so-admin-help">A locally approved profile is not proof of current SSH availability. Click Verify to perform a new audited, read-only capability preflight.</p>}
               {verificationError && <p className="so-admin-error" role="alert">{verificationError}</p>}
               <div className="so-admin-actions">
-                {!freshVerification?.ssh_verified
+                {readOnly ? <span>View account: SSH status is visible. A new verification cannot be started.</span> : !freshVerification?.ssh_verified
                   ? <button type="button" className="so-soft-button" disabled={profilesLoading || !selectedProfile?.verification_ready || Boolean(verifyingId)} onClick={() => void verifySelectedAdminSSH()}><ShieldCheck size={16}/>{verifyingId === selectedBackendId ? 'Verifying SSH…' : 'Verify admin SSH (read-only)'}</button>
                   : <span className="so-admin-success">Verified SSH evidence is available — no repeat click required.</span>}
                 <small>Expiry or trust/credential changes require a new bounded check. Any state-changing maintenance requires separate approval.</small>
@@ -334,11 +335,11 @@ export default function ServerOperations({
               <button className="so-soft-button" type="button" onClick={()=>setTerminalCommand('sentinel check memory')}>Memory command</button>
               <button className="so-soft-button" type="button" onClick={()=>setTerminalCommand('sentinel check cpu')}>CPU command</button>
               <button type="button" className="so-soft-button" onClick={()=>void copyDiagnostic()}><Copy size={16}/>{copied ? 'Copied' : 'Copy command'}</button>
-              <button type="button" className="so-soft-button" disabled={!selectedProfile?.verification_ready || terminalBusy} onClick={()=>void runTerminalCheck()}><Terminal size={16}/>{terminalBusy ? 'Checking…' : 'Run check'}</button>
+              <button type="button" className="so-soft-button" disabled={readOnly || !selectedProfile?.verification_ready || terminalBusy} onClick={()=>void runTerminalCheck()}><Terminal size={16}/>{readOnly ? 'View only' : terminalBusy ? 'Checking…' : 'Run check'}</button>
             </div>
             <p className="so-console-note"><AlertCircle size={15}/> This is a restricted diagnostic editor, not an unrestricted OS shell. Unknown commands are rejected without contacting the VPS. This page does not install OpenVPN or accept arbitrary shell commands.</p>
           </section>
-          {selectedBackendId && <ReviewedCommandConsole key={'reviewed-command:' + selectedBackendId} serverId={selectedBackendId} ready={Boolean(selectedProfile?.verification_ready && freshVerification?.ssh_verified)}/>}
+          {selectedBackendId && <ReviewedCommandConsole key={'reviewed-command:' + selectedBackendId} serverId={selectedBackendId} ready={!readOnly && Boolean(selectedProfile?.verification_ready && freshVerification?.ssh_verified)}/>}
         </> : <section className="so-panel so-await"><XCircle size={35}/><h3>{inventoryStatus === 'offline' ? 'Inventory backend not available' : 'Select a server to continue'}</h3><p>{inventoryStatus === 'connected' ? 'There may be no current health-probe errors. Show all servers for a manual investigation.' : 'The operations workspace uses current, authorized inventory records. No demonstration servers are created.'}</p></section>}
       </section>
     </div>

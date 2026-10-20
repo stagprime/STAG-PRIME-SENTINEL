@@ -40,7 +40,7 @@ class SSHBannerRetryTests(unittest.TestCase):
         self.assertFalse(client.connect.call_args.kwargs['allow_agent'])
         self.assertFalse(client.connect.call_args.kwargs['look_for_keys'])
         client.set_missing_host_key_policy.assert_called_once()
-        self.assertIsInstance(client.set_missing_host_key_policy.call_args.args[0], paramiko.RejectPolicy)
+        self.assertIsInstance(client.set_missing_host_key_policy.call_args.args[0], ssh_monitor._PinFirstSeenHost)
         pause.assert_not_called()
 
     def test_banner_failure_retries_once_with_fresh_client(self):

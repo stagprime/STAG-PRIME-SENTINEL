@@ -51,7 +51,7 @@ def _visible(db,user):
     elif user.role=='staff':
         ids=list(db.scalars(select(AuthClientGrant.client_id).where(AuthClientGrant.user_id==user.id)))
         query=query.where(Client.id.in_(ids))
-    elif user.role!='admin':return []
+    elif user.role not in ('admin', 'viewer'):return []
     servers=dict(db.execute(select(Server.client_id,func.count(Server.id)).where(
         Server.archived_at.is_(None)).group_by(Server.client_id)).all())
     return [{'id':c.id,'name':c.name,'contact_email':c.contact_email,

@@ -182,13 +182,24 @@ def load_ssh_secret(server_id: str, *, host: str, port: int, username: str):
     return method, raw
 
 
+def _configured_origin_hosts() -> set[str]:
+    hosts: set[str] = set()
+    for item in os.environ.get('SENTINEL_ALLOWED_ORIGINS', '').split(','):
+        host = urlsplit(item.strip()).hostname if item.strip() else None
+        if host:
+            hosts.add(host)
+    return hosts
+
+
 def _local_only(request: Request):
-    # This milestone is limited to local Windows development, not remote client
-    # credential enrollment. Proxy or exposed dev servers must not enable it.
+    """Admin routes only. Local dev stays gated; a configured site origin may enroll."""
+    origin = request.headers.get('origin', '')
+    origin_host = urlsplit(origin).hostname if origin else None
+    if origin_host and origin_host in _configured_origin_hosts():
+        return
     if request.client is None or request.client.host not in ('127.0.0.1', '::1', 'testclient'):
         raise HTTPException(403, 'Credential enrollment is limited to the local development server')
-    origin = request.headers.get('origin', '')
-    if origin and urlsplit(origin).hostname not in ('127.0.0.1', 'localhost'):
+    if origin_host and origin_host not in ('127.0.0.1', 'localhost'):
         raise HTTPException(403, 'Credential enrollment requires localhost browser origin')
     if os.name != 'nt' and os.environ.get('SENTINEL_CREDENTIAL_DEV_ALLOW_LOCAL') != '1':
         raise HTTPException(403, 'Credential enrollment requires explicit local development mode')

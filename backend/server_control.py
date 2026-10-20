@@ -12,7 +12,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import inspect
 
-from backend.admin_access import ServerAdminAudit, ServerAdminProfile, _require_admin, _safe_profile
+from backend.admin_access import ServerAdminAudit, ServerAdminProfile, _require_admin, _require_reader, _safe_profile
 import threading
 
 from backend.credential_vault import _local_only
@@ -85,7 +85,7 @@ def _readiness(server: Server, profile: ServerAdminProfile | None) -> dict:
 
 
 @router.get('/control/actions')
-def list_control_actions(admin=Depends(_require_admin)):
+def list_control_actions(admin=Depends(_require_reader)):
     """Authenticated admin-only catalog."""
     return {
         'preview_only': False,
@@ -103,7 +103,7 @@ def list_control_actions(admin=Depends(_require_admin)):
 
 
 @router.get('/servers/{server_id}/control/readiness')
-def get_control_readiness(server_id: str, admin=Depends(_require_admin)):
+def get_control_readiness(server_id: str, admin=Depends(_require_reader)):
     """Local inventory/profile state; cannot claim a live privilege verification."""
     with SessionLocal() as db:
         server = db.get(Server, server_id)

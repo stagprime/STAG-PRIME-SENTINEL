@@ -17,7 +17,7 @@ from pydantic import BaseModel, ConfigDict
 from sqlalchemy import DateTime, ForeignKey, String, Text, inspect
 from sqlalchemy.orm import Mapped, mapped_column
 
-from backend.admin_access import ServerAdminAudit, ServerAdminProfile, _require_admin, _safe_profile
+from backend.admin_access import ServerAdminAudit, ServerAdminProfile, _require_admin, _require_reader, _safe_profile
 from backend.database import Base, Server, SessionLocal, engine
 from backend.read_only_jobs import (
     DiagnosticName, _acquire, _release, _audit_registry_ready, _run_pinned_diagnostic,
@@ -75,7 +75,7 @@ def _public_job(job: ControlledDiagnosticJob) -> dict:
 
 
 @router.get('/jobs/catalog')
-def jobs_catalog(admin=Depends(_require_admin)):
+def jobs_catalog(admin=Depends(_require_reader)):
     return {
         'persisted_job_history': True,
         'execution_mode': 'synchronous_read_only',
@@ -157,7 +157,7 @@ def create_read_only_job(server_id: str, request: CreateDiagnosticJob, admin=Dep
 
 
 @router.get('/jobs/{job_id}')
-def get_controlled_job(job_id: str, admin=Depends(_require_admin)):
+def get_controlled_job(job_id: str, admin=Depends(_require_reader)):
     # Protect against path abuse and normalize missing-job response.
     try:
         from uuid import UUID

@@ -10,7 +10,7 @@ function time(iso: string | null | undefined) {
   return Number.isNaN(date.valueOf()) ? 'Unknown' : date.toLocaleString()
 }
 
-export default function IntegrationsCenter() {
+export default function IntegrationsCenter({ readOnly = false }: { readOnly?: boolean }) {
   const [status, setStatus] = useState<IntegrationStatus | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -100,7 +100,7 @@ export default function IntegrationsCenter() {
         </section>
         <section className="ent-panel">
           <div className="ent-panel-head"><div><h2>Alert webhook</h2><p>{webhook?.locked_by_env ? 'SENTINEL_ALERT_WEBHOOK is set on the server and overrides a saved URL.' : 'https only. The saved address is masked after save.'}</p></div></div>
-          <form className="ent-webhook-form" onSubmit={e => { void save(e) }}>
+          {readOnly ? <p className="ent-panel-foot">View account: the webhook address can be seen here, but it cannot be saved or cleared.</p> : <form className="ent-webhook-form" onSubmit={e => { void save(e) }}>
             <label>
               <span>HTTPS endpoint</span>
               <input value={url} onChange={e => setUrl(e.target.value)} autoComplete="off" spellCheck={false} placeholder="https://hooks.example.com/…" disabled={busy || webhook?.locked_by_env} />
@@ -109,7 +109,7 @@ export default function IntegrationsCenter() {
               <button type="submit" className="btn-primary" disabled={busy || webhook?.locked_by_env || !url.trim()}>Save webhook</button>
               <button type="button" className="btn-secondary" disabled={busy || !webhook?.configured || webhook.source === 'environment'} onClick={() => { void clear() }}>Clear saved URL</button>
             </div>
-          </form>
+          </form>}
           <div className="ent-panel-foot">Current: {loading ? 'Checking…' : webhook?.configured ? `${webhook.masked} (${webhook.source})` : 'No webhook configured'}</div>
         </section>
       </div>

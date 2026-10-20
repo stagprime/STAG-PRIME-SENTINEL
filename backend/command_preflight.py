@@ -21,7 +21,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from backend.admin_access import (
     AdminSSHVerification, ServerAdminAudit, ServerAdminProfile,
-    _identity_pin, _require_admin, _safe_profile, public_admin_verification,
+    _identity_pin, _require_admin, _require_reader, _safe_profile, public_admin_verification,
 )
 from backend.database import Base, Server, SessionLocal, engine
 from backend.read_only_jobs import _acquire, _release
@@ -282,7 +282,7 @@ def _failure_category(exc: Exception) -> str:
 
 
 @router.get('/command-runner/catalog')
-def reviewed_catalog(admin=Depends(_require_admin)):
+def reviewed_catalog(admin=Depends(_require_reader)):
     return {'mode': 'explicit_preview_read_only_with_scoped_sudo_proof', 'arbitrary_shell_enabled': False,
             'sudo_enabled': True, 'sudo_scope': 'fixed_root_identity_proof_only',
             'install_enabled': False, 'repair_enabled': False,
@@ -391,7 +391,7 @@ def execute_reviewed(server_id: str, request: ExecuteInput, admin=Depends(_requi
 
 
 @router.get('/servers/{server_id}/command-runner/runs')
-def list_reviewed_runs(server_id: str, admin=Depends(_require_admin)):
+def list_reviewed_runs(server_id: str, admin=Depends(_require_reader)):
     if not inspect(engine).has_table('reviewed_command_runs'):
         return {'server_id': server_id, 'runs': []}
     with SessionLocal() as db:

@@ -57,6 +57,14 @@ def require_admin_session(current=Depends(require_current_session)) -> AuthUser:
     return user
 
 
+def require_reader_session(current=Depends(require_current_session)) -> AuthUser:
+    """Administrators and view accounts may read. Only administrators may change."""
+    user, _ = current
+    if user.role not in ('admin', 'viewer') or not user.is_active:
+        raise HTTPException(status_code=403, detail='This view is limited to administrators and view accounts')
+    return user
+
+
 def no_cache(response: Response) -> None:
     response.headers['Cache-Control'] = 'no-store'
 
@@ -166,7 +174,7 @@ class CreateUserPayload(BaseModel):
     username: str = Field(min_length=3, max_length=80)
     display_name: str = Field(min_length=2, max_length=120)
     password: str = Field(min_length=14, max_length=128)
-    role: Literal['admin', 'staff', 'client']
+    role: Literal['admin', 'staff', 'client', 'viewer']
     client_id: str | None = None
     client_ids: list[str] = Field(default_factory=list, max_length=1000)
     confirm_admin_access: bool = False
@@ -175,7 +183,7 @@ class CreateUserPayload(BaseModel):
 class UpdateUserPayload(BaseModel):
     model_config = ConfigDict(extra='forbid')
     display_name: str | None = Field(default=None, max_length=120)
-    role: Literal['admin', 'staff', 'client'] | None = None
+    role: Literal['admin', 'staff', 'client', 'viewer'] | None = None
     client_id: str | None = None
     is_active: bool | None = None
     confirm_admin_access: bool = False
@@ -204,7 +212,7 @@ class DeleteUserPayload(BaseModel):
 
 
 @admin_router.get('/clients')
-def list_clients(response: Response, admin=Depends(require_admin_session), db: Session = Depends(auth_database)):
+def list_clients(response: Response, admin=Depends(require_reader_session), db: Session = Depends(auth_database)):
     """Complete client directory for role/grant assignment, including clients without servers.
 
     Admin-only. Never use display names as tenant authorization IDs.
@@ -217,14 +225,14 @@ def list_clients(response: Response, admin=Depends(require_admin_session), db: S
 
 
 @admin_router.get('/users')
-def list_users(response: Response, admin=Depends(require_admin_session), db: Session = Depends(auth_database)):
+def list_users(response: Response, admin=Depends(require_reader_session), db: Session = Depends(auth_database)):
     no_cache(response)
     users = db.scalars(select(AuthUser).order_by(AuthUser.username)).all()
     return {'total': len(users), 'users': [_public_user(db, user) for user in users]}
 
 
 @admin_router.get('/users/{user_id}')
-def get_user(user_id: str, response: Response, admin=Depends(require_admin_session), db: Session = Depends(auth_database)):
+def get_user(user_id: str, response: Response, admin=Depends(require_reader_session), db: Session = Depends(auth_database)):
     no_cache(response)
     return _public_user(db, _user_or_404(db, user_id))
 
@@ -247,6 +255,9 @@ def create_user(data: CreateUserPayload, response: Response, admin=Depends(requi
         if data.client_ids:
             raise HTTPException(status_code=422, detail='Client users cannot receive staff grants')
         _check_client(db, data.client_id)
+    elif data.role == 'viewer':
+        if data.client_id is not None or data.client_ids:
+            raise HTTPException(status_code=422, detail='View accounts must not have client bindings')
     else:
         if data.client_id is not None:
             raise HTTPException(status_code=422, detail='Staff access uses explicit client_ids only')
@@ -418,7 +429,7 @@ def change_own_password(data: ChangePasswordPayload, response: Response, current
 
 
 @admin_router.get('/audit')
-def get_admin_audit(response: Response, limit: int = 50, admin=Depends(require_admin_session), db: Session = Depends(auth_database)):
+def get_admin_audit(response: Response, limit: int = 50, admin=Depends(require_reader_session), db: Session = Depends(auth_database)):
     no_cache(response)
     if not 1 <= limit <= 200:
         raise HTTPException(status_code=422, detail='Limit must be between 1 and 200')

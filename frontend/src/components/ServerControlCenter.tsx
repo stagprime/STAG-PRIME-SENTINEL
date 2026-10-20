@@ -27,11 +27,12 @@ const ACTIONS: ActionDefinition[] = [
   { key: 'vpn-restart', name: 'Restart OpenVPN', description: 'Temporarily interrupts VPN connections', caution: true, icon: RotateCcw, requirement: 'Require the correct service unit, session impact review, rollback and post-restart health verification.' },
 ]
 
-export default function ServerControlCenter({ servers, inventoryStatus, onOpenInventory, onRefresh }: {
+export default function ServerControlCenter({ servers, inventoryStatus, onOpenInventory, onRefresh, readOnly = false }: {
   servers: ControlServer[]
   inventoryStatus: 'loading' | 'connected' | 'offline'
   onOpenInventory: () => void
   onRefresh: () => void
+  readOnly?: boolean
 }) {
   const [search, setSearch] = useState('')
   const [scope, setScope] = useState<'all' | 'registered' | 'archived'>('all')
@@ -138,7 +139,7 @@ export default function ServerControlCenter({ servers, inventoryStatus, onOpenIn
     && readiness.server_id === selected.id && readiness.registry_initialized
     && !readiness.archived && readiness.local_profile_ready
     && readiness.execution_enabled && !readiness.scheduling_enabled)
-  const canPreview = inventoryStatus === 'connected' && Boolean(selected && !selected.archived)
+  const canPreview = !readOnly && inventoryStatus === 'connected' && Boolean(selected && !selected.archived)
   const canRequestAuditPreview = canPreview && catalogState === 'ready' && Boolean(backendReady)
   const canRunDiagnostic = canRequestAuditPreview && enrolled && diagnosticCatalogState === 'ready'
   const canExecuteVpn = canRequestAuditPreview && enrolled && action != null && isExecutableAction(action.key)
@@ -223,7 +224,7 @@ export default function ServerControlCenter({ servers, inventoryStatus, onOpenIn
         </section>
         <section className="scc-panel scc-operations"><div className="scc-panel-title"><div><div className="scc-kicker">MANUAL OPERATIONS</div><h3>Operations &amp; maintenance</h3></div><span className="scc-draft">{backendReady ? 'VPN execute enabled' : 'Setup required'}</span></div>
           <div className="scc-actions">{ACTIONS.map(a => { const Icon = a.icon; const live = isExecutableAction(a.key); return <button key={a.key} type="button" disabled={!canRequestAuditPreview} className={'scc-action' + (a.caution ? ' caution' : '')} onClick={() => reviewAction(a)}><Icon size={21}/><strong>{a.name}</strong><small>{a.description}</small><span>{live ? 'Preview → execute' : 'Preview only'} <ChevronRight size={14}/></span></button> })}</div>
-          {!canRequestAuditPreview && <p className="scc-api-state" role="status">{catalogState === 'error' || readinessState === 'error' ? 'Backend control API unavailable. Refresh the signed-in dashboard and try again.' : 'Need connected inventory + approved admin profile (local key/trust). Enroll monitoring before VPN execute.'}</p>}
+          {!canRequestAuditPreview && <p className="scc-api-state" role="status">{readOnly ? 'View account: server status is visible. Start, stop, restart, and other changes stay off.' : catalogState === 'error' || readinessState === 'error' ? 'Backend control API unavailable. Refresh the signed-in dashboard and try again.' : 'Need connected inventory + approved admin profile (local key/trust). Enroll monitoring before VPN execute.'}</p>}
           {action && <div className="scc-action-preview" role="region" aria-label="Action review"><button type="button" className="scc-close" onClick={() => { previewRequestId.current += 1; setAction(null); setPreviewState(null); setExecuteState({ phase: 'idle' }) }} aria-label="Close preview"><X size={16}/></button><div className="scc-kicker">BACKEND-CONTROLLED OPERATION REVIEW</div><h4>{action.name} · {selected.name}</h4><p>{action.requirement}</p>
             {previewState?.phase === 'loading' && <div className="scc-api-state" role="status">Requesting admin-authorized preview and audit confirmation…</div>}
             {previewState?.phase === 'error' && <div className="scc-api-error" role="alert">{previewState.message} Preview was not confirmed.</div>}
