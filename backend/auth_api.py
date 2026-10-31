@@ -47,21 +47,41 @@ def _csrf_for_token(token: str) -> str:
     return hmac.new(token.encode('utf-8'), b'sentinel-browser-csrf-v1', hashlib.sha256).hexdigest()
 
 
-def _allowed_browser_origin(request: Request) -> bool:
-    """Prevent login CSRF. Only explicitly configured local origins by default."""
+def origin_matches_request_host(request: Request) -> bool:
+    """True when the browser Origin is this same site (production host or local proxy)."""
     origin = request.headers.get('origin', '').rstrip('/')
     if not origin:
         return False
-    allowed = DEV_ORIGINS | {x.strip().rstrip('/') for x in os.environ.get('SENTINEL_ALLOWED_ORIGINS', '').split(',') if x.strip()}
-    if origin not in allowed:
+    parsed = urlsplit(origin)
+    if parsed.scheme not in ('http', 'https') or not parsed.hostname:
+        return False
+    forwarded = request.headers.get('x-forwarded-host', '')
+    host = (forwarded.split(',')[0].strip() or request.headers.get('host', '')).strip()
+    return bool(host) and parsed.netloc.lower() == host.lower()
+
+
+def _allowed_browser_origin(request: Request) -> bool:
+    """Prevent login CSRF. Same-site hosts and explicit local/configured origins only."""
+    origin = request.headers.get('origin', '').rstrip('/')
+    if not origin:
         return False
     parsed = urlsplit(origin)
-    return parsed.scheme in ('http', 'https') and bool(parsed.hostname)
+    if parsed.scheme not in ('http', 'https') or not parsed.hostname:
+        return False
+    if origin_matches_request_host(request):
+        return True
+    allowed = DEV_ORIGINS | {x.strip().rstrip('/') for x in os.environ.get('SENTINEL_ALLOWED_ORIGINS', '').split(',') if x.strip()}
+    return origin in allowed
 
 
 def _set_browser_cookie(response: Response, request: Request, token: str) -> None:
-    # Localhost uses HTTP. On HTTPS or with this deployment setting use Secure.
-    secure = request.url.scheme == 'https' or os.environ.get('SENTINEL_COOKIE_SECURE') == '1'
+    # Localhost uses HTTP. HTTPS deployments, including Vercel's forwarded proto, use Secure.
+    forwarded = request.headers.get('x-forwarded-proto', '').split(',')[0].strip().lower()
+    secure = (
+        request.url.scheme == 'https'
+        or forwarded == 'https'
+        or os.environ.get('SENTINEL_COOKIE_SECURE') == '1'
+    )
     response.set_cookie(
         key=SESSION_COOKIE, value=token, httponly=True,
         secure=secure, samesite='strict', path='/api',

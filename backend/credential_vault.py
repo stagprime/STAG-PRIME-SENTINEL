@@ -192,9 +192,12 @@ def _configured_origin_hosts() -> set[str]:
 
 
 def _local_only(request: Request):
-    """Admin routes only. Local dev stays gated; a configured site origin may enroll."""
+    """Admin routes only. Local dev stays gated; the deployed site origin may enroll."""
+    from backend.auth_api import origin_matches_request_host
     origin = request.headers.get('origin', '')
     origin_host = urlsplit(origin).hostname if origin else None
+    if origin_matches_request_host(request):
+        return
     if origin_host and origin_host in _configured_origin_hosts():
         return
     if request.client is None or request.client.host not in ('127.0.0.1', '::1', 'testclient'):

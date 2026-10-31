@@ -808,3 +808,19 @@ app.include_router(vpn_user_control_router)
 from backend.geoip_lookup import router as geoip_router
 app.include_router(geoip_router)
 
+
+_runtime_schema_ready = False
+
+
+@app.middleware("http")
+async def ensure_hosted_schema(request, call_next):
+    """Vercel has no local bootstrap step. Create tables once per instance before auth."""
+    global _runtime_schema_ready
+    if os.environ.get("VERCEL") == "1" and not _runtime_schema_ready:
+        from backend.database import Base
+        from backend.user_management import initialize_user_management_db
+        Base.metadata.create_all(bind=engine)
+        initialize_user_management_db()
+        _runtime_schema_ready = True
+    return await call_next(request)
+
