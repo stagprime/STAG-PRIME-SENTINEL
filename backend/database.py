@@ -2,10 +2,12 @@
 import os
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import parse_qsl, quote, urlsplit, urlunsplit
 from uuid import uuid4
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker
+from sqlalchemy.pool import NullPool
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,17 +26,90 @@ def _resolve_data_dir() -> Path:
 
 
 DATA_DIR = _resolve_data_dir()
-# Optional sqlite URL only. A hosted Postgres URL needs a driver that is not installed yet.
-_database_override = os.environ.get("SENTINEL_DATABASE_URL", "").strip()
-if _database_override.startswith("sqlite:"):
-    DATABASE_URL = _database_override
-else:
-    DATABASE_URL = f"sqlite:///{(DATA_DIR / 'sentinel.db').as_posix()}"
 
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False},
-)
+
+def _with_neon_ssl(url: str) -> str:
+    parts = urlsplit(url)
+    host = (parts.hostname or "").lower()
+    if "neon.tech" not in host:
+        return url
+    query = dict(parse_qsl(parts.query, keep_blank_values=True))
+    if "sslmode" in query:
+        return url
+    query["sslmode"] = "require"
+    return urlunsplit(parts._replace(query="&".join(f"{quote(k, safe='')}={quote(v, safe='')}" for k, v in query.items())))
+
+
+def normalize_database_url(raw: str, *, data_dir: Path | None = None) -> str:
+    """SQLite stays local. postgres/postgresql URLs use the psycopg driver."""
+    value = (raw or "").strip()
+    folder = data_dir or DATA_DIR
+    if not value:
+        return f"sqlite:///{(folder / 'sentinel.db').as_posix()}"
+    lower = value.lower()
+    if lower.startswith("sqlite:"):
+        return value
+    if lower.startswith("postgres://"):
+        value = "postgresql://" + value[len("postgres://"):]
+        lower = value.lower()
+    if lower.startswith("postgresql+psycopg2://"):
+        value = "postgresql+psycopg://" + value[len("postgresql+psycopg2://"):]
+    elif lower.startswith("postgresql://"):
+        value = "postgresql+psycopg://" + value[len("postgresql://"):]
+    elif lower.startswith("postgresql+psycopg://"):
+        pass
+    elif lower.startswith("postgresql+"):
+        value = "postgresql+psycopg://" + value.split("://", 1)[1]
+    else:
+        raise RuntimeError("SENTINEL_DATABASE_URL must be a sqlite URL or a postgres/postgresql URL")
+    return _with_neon_ssl(value)
+
+
+def direct_postgres_url(url: str) -> str:
+    """Neon pooled hosts are for app traffic. DDL uses the direct host when one is obvious."""
+    parts = urlsplit(url)
+    host = parts.hostname or ""
+    if "-pooler." not in host:
+        return url
+    direct_host = host.replace("-pooler.", ".", 1)
+    userinfo = ""
+    if parts.username is not None:
+        userinfo = quote(parts.username, safe="")
+        if parts.password is not None:
+            userinfo += ":" + quote(parts.password, safe="")
+        userinfo += "@"
+    port = f":{parts.port}" if parts.port else ""
+    return urlunsplit(parts._replace(netloc=f"{userinfo}{direct_host}{port}"))
+
+
+def is_postgres_url(url: str) -> bool:
+    return url.startswith("postgresql")
+
+
+def build_engine(url: str):
+    if is_postgres_url(url):
+        # NullPool plus prepare_threshold=None suits Neon PgBouncer on Fluid Compute.
+        return create_engine(
+            url,
+            poolclass=NullPool,
+            pool_pre_ping=True,
+            connect_args={"prepare_threshold": None},
+        )
+    return create_engine(url, connect_args={"check_same_thread": False})
+
+
+def schema_engine():
+    """Engine used for create_all. Pooled Neon URLs are rewritten to the direct host."""
+    if not is_postgres_url(DATABASE_URL):
+        return engine, False
+    direct = direct_postgres_url(DATABASE_URL)
+    if direct == DATABASE_URL:
+        return engine, False
+    return build_engine(direct), True
+
+
+DATABASE_URL = normalize_database_url(os.environ.get("SENTINEL_DATABASE_URL", ""))
+engine = build_engine(DATABASE_URL)
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 

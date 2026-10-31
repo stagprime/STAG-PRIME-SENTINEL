@@ -1,19 +1,25 @@
-"""Local administrator bootstrap, without hardcoded accounts or passwords.
+"""First administrator bootstrap. The password is typed in this terminal only.
 
-From project root: .venv\\Scripts\\python.exe -m backend.auth_cli bootstrap-admin
+From the project root, after SENTINEL_DATABASE_URL points at the durable database:
+
+    python -m backend.auth_cli bootstrap-admin
+
+Vercel functions have no terminal, so this is not a serverless one-shot.
+Run it on a trusted computer that can reach the same Postgres URL.
 """
 import argparse
 import getpass
 import sys
 from sqlalchemy import select
 
-from backend.auth_models import AuthUser, create_auth_tables
+from backend.auth_models import AuthUser
 from backend.auth_security import hash_password, normalize_username, validate_password
 from backend.database import SessionLocal
+from backend.schema import ensure_schema
 
 
 def bootstrap_admin() -> int:
-    create_auth_tables()
+    ensure_schema()
     with SessionLocal() as db:
         # Only the *first* admin is bootstrapped this way. Future management
         # requires a protected administrative workflow.

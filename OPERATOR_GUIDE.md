@@ -62,6 +62,23 @@ Optional Slack/Discord-style webhook:
 
 Put one HTTPS URL in that file, or set env `SENTINEL_ALERT_WEBHOOK`.
 
+## Vercel production
+
+Emily sets these on the Vercel project `stag-prime-sentinel` (Production, and Preview if previews should use a database). Do not commit the values.
+
+| Name | Value |
+| --- | --- |
+| `SENTINEL_DATABASE_URL` | Neon **pooled** Postgres URL. `postgres://` and `postgresql://` are both accepted. Prefer the host that contains `-pooler`. The app rewrites that host to the direct endpoint only while creating tables. |
+| `SENTINEL_VAULT_MASTER_KEY` | Fernet key. On a trusted computer: `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`. Losing this key makes saved SSH credentials unreadable. |
+
+The hosted SQLite file is not durable. Leave `SENTINEL_DATABASE_URL` unset only for local SQLite.
+
+### First administrator
+
+`python -m backend.auth_cli bootstrap-admin` asks for the username and password in the terminal. A Vercel function cannot run that prompt, so there is no serverless bootstrap.
+
+After the Neon URL is set, run the command once on a trusted computer with the same `SENTINEL_DATABASE_URL`. It creates the tables if they are missing, then the first admin, and it stops if an admin already exists. The password is not written to Vercel.
+
 ## Notes
 
 - VPN user **block** (OpenVPN) writes CCD `disable` + best-effort disconnect.  
