@@ -466,6 +466,12 @@ def main() -> int:
             print(f'SUCCESS: SQLite online backup saved to {backup_database()}')
             return 0
         if args.action == 'init-db':
+            from backend.database import DATABASE_URL, is_postgres_url
+            if is_postgres_url(DATABASE_URL):
+                from backend.schema import ensure_schema
+                ensure_schema()
+                print('SUCCESS: Postgres schema verified/created.')
+                return 0
             if not (DATA_DIR / 'sentinel.db').is_file():
                 raise FileNotFoundError('Existing data/sentinel.db not found. Check project folder.')
             print(f'SAFETY BACKUP: {backup_database()}')

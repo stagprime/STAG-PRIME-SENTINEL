@@ -816,11 +816,10 @@ _runtime_schema_ready = False
 async def ensure_hosted_schema(request, call_next):
     """Vercel has no local bootstrap step. Create tables once per instance before auth."""
     global _runtime_schema_ready
-    if os.environ.get("VERCEL") == "1" and not _runtime_schema_ready:
-        from backend.database import Base
-        from backend.user_management import initialize_user_management_db
-        Base.metadata.create_all(bind=engine)
-        initialize_user_management_db()
+    from backend.database import is_postgres_url, DATABASE_URL
+    if not _runtime_schema_ready and (os.environ.get("VERCEL") == "1" or is_postgres_url(DATABASE_URL)):
+        from backend.schema import ensure_schema
+        ensure_schema()
         _runtime_schema_ready = True
     return await call_next(request)
 
