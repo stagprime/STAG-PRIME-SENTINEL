@@ -38,6 +38,7 @@ class PersistentSessionTests(unittest.TestCase):
             db.commit()
             self.uid = u.id
         app = FastAPI()
+        self.app = app
         app.include_router(router)
         app.include_router(admin_router)
         @app.post('/api/dummy-change')
@@ -89,6 +90,13 @@ class PersistentSessionTests(unittest.TestCase):
             headers={'Origin': 'https://bad.example'}, json={
                 'username': 'cookieadmin', 'password': PASSWORD}).status_code, 403)
         self.assertIsNone(self.client.cookies.get('sentinel_session'))
+        hosted = TestClient(self.app, base_url='https://stag-prime-sentinel.vercel.app')
+        self.addCleanup(hosted.close)
+        allowed = hosted.post('/api/auth/login-cookie', headers={
+            'Origin': 'https://stag-prime-sentinel.vercel.app'}, json={
+            'username': 'cookieadmin', 'password': PASSWORD})
+        self.assertEqual(allowed.status_code, 200)
+        self.assertIn('secure', allowed.headers['set-cookie'].lower())
 
     def test_cookie_write_without_csrf_is_denied(self):
         self.login()

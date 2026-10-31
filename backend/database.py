@@ -1,4 +1,5 @@
 
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
@@ -7,10 +8,28 @@ from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, create_en
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / "data"
-DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-DATABASE_URL = f"sqlite:///{(DATA_DIR / 'sentinel.db').as_posix()}"
+
+def _resolve_data_dir() -> Path:
+    """Local installs keep SQLite beside the repo. Vercel functions can only write /tmp."""
+    override = os.environ.get("SENTINEL_DATA_DIR", "").strip()
+    if override:
+        path = Path(override)
+    elif os.environ.get("VERCEL") == "1":
+        path = Path("/tmp/stag-prime-sentinel")
+    else:
+        path = BASE_DIR / "data"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+DATA_DIR = _resolve_data_dir()
+# Optional sqlite URL only. A hosted Postgres URL needs a driver that is not installed yet.
+_database_override = os.environ.get("SENTINEL_DATABASE_URL", "").strip()
+if _database_override.startswith("sqlite:"):
+    DATABASE_URL = _database_override
+else:
+    DATABASE_URL = f"sqlite:///{(DATA_DIR / 'sentinel.db').as_posix()}"
 
 engine = create_engine(
     DATABASE_URL,
